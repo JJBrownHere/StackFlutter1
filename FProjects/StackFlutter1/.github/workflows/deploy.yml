@@ -22,7 +22,10 @@ jobs:
         run: flutter pub get
         
       - name: Build web
-        run: flutter build web --release --web-renderer canvaskit --base-href /StackFlutter1/
+        run: flutter build web --release --web-renderer canvaskit --base-href /
+        
+      - name: Configure custom domain
+        run: echo "itscrazyamazing.com" > build/web/CNAME
         
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
