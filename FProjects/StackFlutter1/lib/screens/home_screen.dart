@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'price_checks_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -58,7 +59,12 @@ class HomeScreen extends StatelessWidget {
                       Icons.attach_money,
                       Colors.green,
                       () {
-                        // TODO: Navigate to Price STACKS screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PriceChecksScreen(),
+                          ),
+                        );
                       },
                     ),
                     _buildDashboardCard(

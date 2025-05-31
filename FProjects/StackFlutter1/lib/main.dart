@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth_callback_screen.dart';
+import 'screens/price_checks_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
           },
         ),
         '/auth-callback': (context) => const AuthCallbackScreen(),
+        '/price-checks': (context) => const PriceChecksScreen(),
       },
     );
   }

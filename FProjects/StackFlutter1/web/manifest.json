@@ -1,11 +1,11 @@
 {
-    "name": "auth_app",
-    "short_name": "auth_app",
+    "name": "STACKS",
+    "short_name": "STACKS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "STACKS Flutter Web Application",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -34,7 +34,7 @@ A modern Flutter web application with authentication and dashboard interface.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/StackFlutter1.git
+git clone https://github.com/jjbrownhere/StackFlutter1.git
 ```
 
 2. Navigate to the project directory:
