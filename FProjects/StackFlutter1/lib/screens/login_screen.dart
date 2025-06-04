@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:html' as html;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,11 +15,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
+  final _googleSignIn = GoogleSignIn(
+    clientId: '670058417215-1nn1tuf9cn70e0kv0ocinto8bnrbt302.apps.googleusercontent.com',
+  );
 
   String get _redirectUrl {
     if (kIsWeb) {
-      final origin = html.window.location.origin;
-      return '$origin/auth-callback';
+      return 'https://qpssvbgcqzzhpxrpldny.supabase.co/auth/v1/callback';
     }
     return 'https://qpssvbgcqzzhpxrpldny.supabase.co/auth/v1/callback';
   }
@@ -30,9 +32,15 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        Provider.google,
-        redirectTo: _redirectUrl,
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: googleAuth.idToken!,
+        accessToken: googleAuth.accessToken,
       );
     } catch (error) {
       if (mounted) {
@@ -64,11 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-      
+
       await Supabase.instance.client.auth.signInWithIdToken(
-        provider: Provider.apple,
+        provider: OAuthProvider.apple,
         idToken: credential.identityToken!,
-        accessToken: credential.authorizationCode,
       );
     } catch (error) {
       if (mounted) {

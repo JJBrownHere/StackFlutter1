@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
-import 'home_screen.dart';
+import '../helpers/web_helpers.dart'
+    if (dart.library.html) '../helpers/web_helpers.dart'
+    if (dart.library.io) '../helpers/stub_helpers.dart';
 
 class AuthCallbackScreen extends StatefulWidget {
   const AuthCallbackScreen({super.key});
@@ -22,7 +23,7 @@ class _AuthCallbackScreenState extends State<AuthCallbackScreen> {
     try {
       if (kIsWeb) {
         // Get the current URL
-        final uri = Uri.parse(html.window.location.href);
+        final uri = Uri.parse(getCurrentUrl());
         if (uri.hasFragment) {
           // Convert the fragment to query parameters
           final params = Uri.parse('?${uri.fragment}').queryParameters;
