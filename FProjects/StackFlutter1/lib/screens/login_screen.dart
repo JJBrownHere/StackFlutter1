@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
+import 'package:uni_links/uni_links.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,34 @@ class _LoginScreenState extends State<LoginScreen> {
   final _googleSignIn = GoogleSignIn(
     serverClientId: '670058417215-ndvgibnvf1ihlqgaqn7fuqtb8cf0b1u0.apps.googleusercontent.com',
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _handleIncomingLinks();
+  }
+
+  void _handleIncomingLinks() {
+    uriLinkStream.listen((Uri? uri) async {
+      if (uri != null && uri.scheme == 'com.itscrazyamazing.stacks') {
+        try {
+          await Supabase.instance.client.auth.getSessionFromUrl(uri.toString());
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/');
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error handling deep link: \\${e.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+    });
+  }
 
   String get _redirectUrl {
     if (kIsWeb) {
@@ -102,6 +131,12 @@ class _LoginScreenState extends State<LoginScreen> {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        webAuthenticationOptions: Platform.isAndroid
+            ? WebAuthenticationOptions(
+                clientId: 'com.itscrazyamazing.stacks.signin',
+                redirectUri: Uri.parse('https://qpssvbgcqzzhpxrpldny.supabase.co/auth/v1/callback'),
+              )
+            : null,
       );
 
       await Supabase.instance.client.auth.signInWithIdToken(

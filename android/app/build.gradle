@@ -1,0 +1,22 @@
+android {
+    namespace "com.itscrazyamazing.auth_app"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion "25.1.8937393"
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+}
+
+// Disable deferred components
+android.buildTypes.release.ndk.debugSymbolLevel = 'NONE'
+android.buildTypes.release.ndk.stripDebugSymbols = true 

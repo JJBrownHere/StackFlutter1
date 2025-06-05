@@ -51,6 +51,9 @@ dependencies:
   path_provider: ^2.1.5
   path_provider_android: ^2.2.17
 
+  # Deep Link
+  uni_links: ^0.5.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
