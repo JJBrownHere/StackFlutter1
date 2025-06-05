@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,7 +18,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   final _googleSignIn = GoogleSignIn(
-    clientId: '670058417215-1nn1tuf9cn70e0kv0ocinto8bnrbt302.apps.googleusercontent.com',
+    serverClientId: '670058417215-ndvgibnvf1ihlqgaqn7fuqtb8cf0b1u0.apps.googleusercontent.com',
   );
 
   String get _redirectUrl {
@@ -33,16 +35,45 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
+      print('googleUser: $googleUser');
+      if (googleUser == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        print('Google user is null (sign-in cancelled or failed)');
+        return;
+      }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      
+      final GoogleSignInAuthentication? googleAuth = await googleUser.authentication;
+      print('googleAuth: $googleAuth');
+      print('idToken: ${googleAuth?.idToken}');
+      print('accessToken: ${googleAuth?.accessToken}');
+      if (googleAuth == null || googleAuth.idToken == null || googleAuth.accessToken == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google authentication failed.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        print('Google authentication tokens are null');
+        return;
+      }
+
       await Supabase.instance.client.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: googleAuth.idToken!,
         accessToken: googleAuth.accessToken,
       );
     } catch (error) {
+      if (error is PlatformException) {
+        print('PlatformException code: ${error.code}');
+        print('PlatformException message: ${error.message}');
+        print('PlatformException details: ${error.details}');
+      }
+      print('Exception during Google sign-in: $error');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
