@@ -19,7 +19,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   final _googleSignIn = GoogleSignIn(
-    serverClientId: '670058417215-ndvgibnvf1ihlqgaqn7fuqtb8cf0b1u0.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
   );
 
   @override
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     uriLinkStream.listen((Uri? uri) async {
       if (uri != null && uri.scheme == 'com.itscrazyamazing.stacks') {
         try {
-          await Supabase.instance.client.auth.getSessionFromUrl(uri.toString());
+          await Supabase.instance.client.auth.getSessionFromUrl(uri);
           if (mounted) {
             Navigator.of(context).pushReplacementNamed('/');
           }
