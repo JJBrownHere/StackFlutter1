@@ -8,6 +8,7 @@ import 'screens/price_checks_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/account_screen.dart';
 import 'screens/credits_screen.dart';
+import 'screens/gatekeeper_screen.dart';
 
 globalRefreshSession(BuildContext context) {
   // Helper to refresh the app after login/logout
@@ -80,7 +81,7 @@ class MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       initialRoute: '/',
       routes: {
-        '/': (context) => _authenticated ? const HomeScreen() : const LoginScreen(),
+        '/': (context) => _authenticated ? const GatekeeperScreen() : const LoginScreen(),
         '/auth-callback': (context) => const AuthCallbackScreen(),
         '/price-checks': (context) => const PriceChecksScreen(),
         '/about': (context) => const AboutScreen(),

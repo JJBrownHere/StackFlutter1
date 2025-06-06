@@ -49,6 +49,17 @@ class _LoginScreenState extends State<LoginScreen> {
     return 'https://qpssvbgcqzzhpxrpldny.supabase.co/auth/v1/callback';
   }
 
+  Future<void> _ensureUserProfile({String? firstName, String? lastName, String? email}) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    await Supabase.instance.client.from('profiles').upsert({
+      'id': user.id,
+      'first_name': firstName ?? '',
+      'last_name': lastName ?? '',
+      'email': email ?? user.email ?? '',
+    });
+  }
+
   Future<void> _handleGoogleSignIn() async {
     setState(() {
       _isLoading = true;
@@ -56,7 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (kIsWeb) {
-        // Use Supabase's web OAuth flow for Google
         await Supabase.instance.client.auth.signInWithOAuth(
           OAuthProvider.google,
           redirectTo: 'https://itscrazyamazing.com/',
@@ -67,55 +77,31 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      print('googleUser: $googleUser');
       if (googleUser == null) {
         setState(() {
           _isLoading = false;
         });
-        print('Google user is null (sign-in cancelled or failed)');
         return;
       }
       final GoogleSignInAuthentication? googleAuth = await googleUser.authentication;
-      print('googleAuth: $googleAuth');
-      print('idToken: ${googleAuth?.idToken}');
-      print('accessToken: ${googleAuth?.accessToken}');
-      if (googleAuth == null) {
-        print('googleAuth is null');
+      if (googleAuth == null || googleAuth.idToken == null || googleAuth.accessToken == null) {
         setState(() { _isLoading = false; });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google authentication failed: googleAuth is null.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      if (googleAuth.idToken == null) {
-        print('googleAuth.idToken is null');
-        setState(() { _isLoading = false; });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google authentication failed: idToken is null.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      if (googleAuth.accessToken == null) {
-        print('googleAuth.accessToken is null');
-        setState(() { _isLoading = false; });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google authentication failed: accessToken is null.'),
-            backgroundColor: Colors.red,
-          ),
-        );
         return;
       }
       await Supabase.instance.client.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: googleAuth.idToken!,
         accessToken: googleAuth.accessToken,
+      );
+      // Extract first and last name from Google profile
+      final displayName = googleUser.displayName ?? '';
+      final names = displayName.split(' ');
+      final firstName = names.isNotEmpty ? names.first : '';
+      final lastName = names.length > 1 ? names.sublist(1).join(' ') : '';
+      await _ensureUserProfile(
+        firstName: firstName,
+        lastName: lastName,
+        email: googleUser.email,
       );
       globalRefreshSession(context);
     } catch (error) {
@@ -164,6 +150,14 @@ class _LoginScreenState extends State<LoginScreen> {
       await Supabase.instance.client.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
         idToken: credential.identityToken!,
+      );
+      // Extract first and last name from Apple credential
+      final firstName = credential.givenName ?? '';
+      final lastName = credential.familyName ?? '';
+      await _ensureUserProfile(
+        firstName: firstName,
+        lastName: lastName,
+        email: credential.email,
       );
       globalRefreshSession(context);
     } catch (error) {
