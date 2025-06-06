@@ -129,12 +129,29 @@ class _AccountScreenState extends State<AccountScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            _buildInfoCard(
-              title: 'Google Sheets Integration',
-              children: [
-                _buildSheetSection('lead', 'STACKS Lead Sheet'),
-                _buildSheetSection('inventory', 'STACKS Inventory Sheet'),
-              ],
+            // Google Sheets section
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                'Google Sheets',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSheetSection('lead', 'STACKS Lead Sheet'),
+                    _buildSheetSection('inventory', 'STACKS Inventory Sheet'),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
@@ -169,7 +186,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   onPressed: () async {
                     await Supabase.instance.client.auth.signOut();
                     if (mounted) {
-                      Navigator.of(context).pushReplacementNamed('/');
+                      globalRefreshSession(context);
                     }
                   },
                   icon: const Icon(Icons.logout),
