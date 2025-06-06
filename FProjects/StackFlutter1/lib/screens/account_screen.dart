@@ -1,14 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../main.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
+
+  @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
+  bool _isLoading = false;
+  Map<String, dynamic>? _profile;
+  List<Map<String, dynamic>> _sheets = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileAndSheets();
+  }
+
+  Future<void> _loadProfileAndSheets() async {
+    setState(() { _isLoading = true; });
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      final profile = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+      final sheets = await Supabase.instance.client
+          .from('sheets')
+          .select()
+          .eq('user_id', user.id);
+      setState(() {
+        _profile = profile;
+        _sheets = List<Map<String, dynamic>>.from(sheets);
+        _isLoading = false;
+      });
+    } else {
+      setState(() { _isLoading = false; });
+    }
+  }
+
+  Future<void> _createSheet(String type, String sheetName) async {
+    setState(() { _isLoading = true; });
+    // TODO: Replace with your Google Sheets creation logic
+    final sheetId = DateTime.now().millisecondsSinceEpoch.toString(); // Placeholder
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      await Supabase.instance.client.from('sheets').insert({
+        'user_id': user.id,
+        'type': type,
+        'sheet_id': sheetId,
+        'sheet_name': sheetName,
+      });
+      await _loadProfileAndSheets();
+    }
+    setState(() { _isLoading = false; });
+  }
+
+  Widget _buildSheetSection(String type, String label) {
+    final sheet = _sheets.firstWhere(
+      (s) => s['type'] == type,
+      orElse: () => {},
+    );
+    if (sheet.isEmpty) {
+      return ElevatedButton(
+        onPressed: () => _createSheet(type, label),
+        child: Text('Create $label'),
+      );
+    } else {
+      return ListTile(
+        title: Text('$label: Connected'),
+        subtitle: Text(sheet['sheet_name'] ?? ''),
+        trailing: IconButton(
+          icon: const Icon(Icons.open_in_new),
+          onPressed: () {
+            final url = 'https://docs.google.com/spreadsheets/d/${sheet['sheet_id']}';
+            launchUrl(Uri.parse(url));
+          },
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
     final email = user?.email ?? 'Not signed in';
+
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -41,11 +130,10 @@ class AccountScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
-              title: 'Subscription',
+              title: 'Google Sheets Integration',
               children: [
-                _buildInfoRow('Plan', 'Standard'),
-                _buildInfoRow('Status', 'Active'),
-                _buildInfoRow('Next Billing', 'Monthly'),
+                _buildSheetSection('lead', 'STACKS Lead Sheet'),
+                _buildSheetSection('inventory', 'STACKS Inventory Sheet'),
               ],
             ),
             const SizedBox(height: 16),
@@ -55,11 +143,8 @@ class AccountScreen extends StatelessWidget {
                 SwitchListTile(
                   title: const Text('Email Notifications'),
                   value: true,
-                  onChanged: (value) {
-                    // TODO: Implement notification toggle
-                  },
+                  onChanged: (value) {},
                 ),
-                // Dark mode toggle
                 SwitchListTile(
                   title: const Text('Dark Mode'),
                   subtitle: const Text('Toggle dark theme'),
@@ -77,16 +162,34 @@ class AccountScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // TODO: Implement account deletion
-                },
-                child: const Text(
-                  'Delete Account',
-                  style: TextStyle(color: Colors.red),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    await Supabase.instance.client.auth.signOut();
+                    if (mounted) {
+                      Navigator.of(context).pushReplacementNamed('/');
+                    }
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Logout'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
-              ),
+                TextButton.icon(
+                  onPressed: () {
+                    // TODO: Implement account deletion
+                  },
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text('Delete Account'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

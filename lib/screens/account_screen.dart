@@ -248,6 +248,19 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
+              title: 'Google Sheets Integration',
+              children: [
+                if (_profile?['google_sheet_id'] == null)
+                  ElevatedButton(
+                    onPressed: _setupGoogleSheet,
+                    child: const Text('Setup Google Sheet'),
+                  )
+                else
+                  _buildInfoRow('Google Sheet', 'Connected'),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildInfoCard(
               title: 'Preferences',
               children: [
                 SwitchListTile(
