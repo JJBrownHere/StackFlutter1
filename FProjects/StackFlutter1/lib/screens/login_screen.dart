@@ -7,7 +7,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
-import 'package:uni_links/uni_links.dart';
+import '../helpers/session_helper.dart';
+// Conditional import for mobile deep link handling
+import 'login_links_mobile.dart'
+  if (dart.library.html) 'login_links_stub.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,29 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _handleIncomingLinks();
-  }
-
-  void _handleIncomingLinks() {
-    uriLinkStream.listen((Uri? uri) async {
-      if (uri != null && uri.scheme == 'com.itscrazyamazing.stacks') {
-        try {
-          await Supabase.instance.client.auth.getSessionFromUrl(uri);
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed('/');
-          }
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error handling deep link: \\${e.toString()}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      }
-    });
+    if (!kIsWeb) {
+      handleIncomingLinks(context);
+    }
   }
 
   String get _redirectUrl {
@@ -96,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth.idToken!,
         accessToken: googleAuth.accessToken,
       );
+      globalRefreshSession(context);
     } catch (error) {
       if (error is PlatformException) {
         print('PlatformException code: ${error.code}');
@@ -143,6 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
         provider: OAuthProvider.apple,
         idToken: credential.identityToken!,
       );
+      globalRefreshSession(context);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

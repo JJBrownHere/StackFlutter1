@@ -1,9 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth_callback_screen.dart';
 import 'screens/price_checks_screen.dart';
+import 'screens/about_screen.dart';
+import 'screens/account_screen.dart';
+import 'screens/credits_screen.dart';
+
+globalRefreshSession(BuildContext context) {
+  // Helper to refresh the app after login/logout
+  final MyAppState? state = context.findAncestorStateOfType<MyAppState>();
+  state?.refreshSession();
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,33 +26,66 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  bool _loading = true;
+  bool _authenticated = false;
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    refreshSession();
+  }
+
+  void refreshSession() {
+    final session = Supabase.instance.client.auth.currentSession;
+    setState(() {
+      _authenticated = session != null;
+      _loading = false;
+    });
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
     return MaterialApp(
       title: 'STACKS',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+        useMaterial3: true,
+      ),
+      themeMode: _themeMode,
       initialRoute: '/',
       routes: {
-        '/': (context) => StreamBuilder<AuthState>(
-          stream: Supabase.instance.client.auth.onAuthStateChange,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final session = snapshot.data!.session;
-              if (session != null) {
-                return const HomeScreen();
-              }
-            }
-            return const LoginScreen();
-          },
-        ),
+        '/': (context) => _authenticated ? const HomeScreen() : const LoginScreen(),
         '/auth-callback': (context) => const AuthCallbackScreen(),
         '/price-checks': (context) => const PriceChecksScreen(),
+        '/about': (context) => const AboutScreen(),
+        '/account': (context) => const AccountScreen(),
+        '/credits': (context) => const CreditsScreen(),
       },
     );
   }

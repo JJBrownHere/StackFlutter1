@@ -28,6 +28,8 @@
 	<string>670058417215-1nn1tuf9cn70e0kv0ocinto8bnrbt302.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to scan IMEI numbers</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -34,6 +34,38 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
   Future<void> _loadModels() async {
     try {
       final models = await _priceService.getIPhoneModels();
+      // Accurate order for iPhones (newest to oldest, including variants)
+      final customOrder = [
+        'iphone 16 pro max', 'iphone 16 pro', 'iphone 16 plus', 'iphone 16',
+        'iphone 15 pro max', 'iphone 15 pro', 'iphone 15 plus', 'iphone 15',
+        'iphone 14 pro max', 'iphone 14 pro', 'iphone 14 plus', 'iphone 14',
+        'iphone 13 pro max', 'iphone 13 pro', 'iphone 13 mini', 'iphone 13',
+        'iphone 12 pro max', 'iphone 12 pro', 'iphone 12 mini', 'iphone 12',
+        'iphone 11 pro max', 'iphone 11 pro', 'iphone 11',
+        'iphone xs max', 'iphone xs', 'iphone xr',
+        'iphone x',
+        'iphone 8 plus', 'iphone 8',
+        'iphone 7 plus', 'iphone 7',
+        'iphone 6s plus', 'iphone 6s',
+        'iphone 6 plus', 'iphone 6',
+        'iphone se3', 'iphone se2', 'iphone se',
+      ];
+      String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+      models.sort((a, b) {
+        final aNorm = normalize(a);
+        final bNorm = normalize(b);
+        final aIndex = customOrder.indexOf(aNorm);
+        final bIndex = customOrder.indexOf(bNorm);
+        if (aIndex == -1 && bIndex == -1) {
+          return aNorm.compareTo(bNorm); // fallback: alpha
+        } else if (aIndex == -1) {
+          return 1;
+        } else if (bIndex == -1) {
+          return -1;
+        } else {
+          return aIndex.compareTo(bIndex);
+        }
+      });
       setState(() {
         _models = models;
         _isLoadingModels = false;
@@ -61,6 +93,14 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
 
     try {
       final storageOptions = await _priceService.getStorageSizes(modelId);
+      // Sort storage options numerically (e.g., 64GB, 128GB, ...)
+      storageOptions.sort((a, b) {
+        int extractNum(String s) {
+          final match = RegExp(r'\d+').firstMatch(s);
+          return match != null ? int.parse(match.group(0)!) : 0;
+        }
+        return extractNum(a).compareTo(extractNum(b));
+      });
       setState(() {
         _storageOptions = storageOptions;
         _isLoadingStorage = false;
