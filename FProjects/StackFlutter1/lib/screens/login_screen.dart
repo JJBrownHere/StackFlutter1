@@ -21,13 +21,22 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
-  final _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-  );
+  late final GoogleSignIn _googleSignIn;
 
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile', 'openid'],
+      );
+      print('GoogleSignIn (WEB): no explicit clientId');
+    } else {
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile', 'openid'],
+      );
+      print('GoogleSignIn (MOBILE): default clientId');
+    }
     if (!kIsWeb) {
       handleIncomingLinks(context);
     }
@@ -46,6 +55,17 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      if (kIsWeb) {
+        // Use Supabase's web OAuth flow for Google
+        await Supabase.instance.client.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: 'https://itscrazyamazing.com/',
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       print('googleUser: $googleUser');
       if (googleUser == null) {
@@ -55,25 +75,43 @@ class _LoginScreenState extends State<LoginScreen> {
         print('Google user is null (sign-in cancelled or failed)');
         return;
       }
-
       final GoogleSignInAuthentication? googleAuth = await googleUser.authentication;
       print('googleAuth: $googleAuth');
       print('idToken: ${googleAuth?.idToken}');
       print('accessToken: ${googleAuth?.accessToken}');
-      if (googleAuth == null || googleAuth.idToken == null || googleAuth.accessToken == null) {
-        setState(() {
-          _isLoading = false;
-        });
+      if (googleAuth == null) {
+        print('googleAuth is null');
+        setState(() { _isLoading = false; });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google authentication failed.'),
+          const SnackBar(
+            content: Text('Google authentication failed: googleAuth is null.'),
             backgroundColor: Colors.red,
           ),
         );
-        print('Google authentication tokens are null');
         return;
       }
-
+      if (googleAuth.idToken == null) {
+        print('googleAuth.idToken is null');
+        setState(() { _isLoading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google authentication failed: idToken is null.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if (googleAuth.accessToken == null) {
+        print('googleAuth.accessToken is null');
+        setState(() { _isLoading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google authentication failed: accessToken is null.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
       await Supabase.instance.client.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: googleAuth.idToken!,
