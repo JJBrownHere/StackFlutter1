@@ -61,32 +61,39 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const MaterialApp(
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-    return MaterialApp(
-      title: 'STACKS',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
-        useMaterial3: true,
-      ),
-      themeMode: _themeMode,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => _authenticated ? const GatekeeperScreen() : const LoginScreen(),
-        '/auth-callback': (context) => const AuthCallbackScreen(),
-        '/price-checks': (context) => const PriceChecksScreen(),
-        '/about': (context) => const AboutScreen(),
-        '/account': (context) => const AccountScreen(),
-        '/credits': (context) => const CreditsScreen(),
+    return StreamBuilder<AuthState>(
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session = Supabase.instance.client.auth.currentSession;
+        final authenticated = session != null;
+        if (_loading) {
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        return MaterialApp(
+          title: 'STACKS',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+            useMaterial3: true,
+          ),
+          themeMode: _themeMode,
+          initialRoute: '/',
+          routes: {
+            '/': (context) => authenticated ? const GatekeeperScreen() : const LoginScreen(),
+            '/auth-callback': (context) => const AuthCallbackScreen(),
+            '/price-checks': (context) => const PriceChecksScreen(),
+            '/about': (context) => const AboutScreen(),
+            '/account': (context) => const AccountScreen(),
+            '/credits': (context) => const CreditsScreen(),
+          },
+        );
       },
     );
   }

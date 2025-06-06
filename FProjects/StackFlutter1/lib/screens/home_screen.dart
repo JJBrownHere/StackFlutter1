@@ -127,7 +127,6 @@ class HomeScreen extends StatelessWidget {
               onTap: () async {
                 Navigator.pop(context);
                 await Supabase.instance.client.auth.signOut();
-                globalRefreshSession(context);
               },
             ),
           ],

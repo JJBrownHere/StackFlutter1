@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../main.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'login_screen.dart';
+import 'dart:html' as html;
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -186,7 +188,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   onPressed: () async {
                     await Supabase.instance.client.auth.signOut();
                     if (mounted) {
-                      globalRefreshSession(context);
+                      html.window.location.reload();
                     }
                   },
                   icon: const Icon(Icons.logout),
