@@ -134,6 +134,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      if (kIsWeb) {
+        await Supabase.instance.client.auth.signInWithOAuth(
+          Provider.apple,
+          redirectTo: 'https://itscrazyamazing.com/',
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -148,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       await Supabase.instance.client.auth.signInWithIdToken(
-        provider: OAuthProvider.apple,
+        provider: Provider.apple,
         idToken: credential.identityToken!,
       );
       // Extract first and last name from Apple credential
