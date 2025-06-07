@@ -188,7 +188,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   onPressed: () async {
                     await Supabase.instance.client.auth.signOut();
                     if (mounted) {
-                      html.window.location.reload();
+                      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
                     }
                   },
                   icon: const Icon(Icons.logout),
@@ -196,16 +196,6 @@ class _AccountScreenState extends State<AccountScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    // TODO: Implement account deletion
-                  },
-                  icon: const Icon(Icons.delete_forever),
-                  label: const Text('Delete Account'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red,
                   ),
                 ),
               ],
