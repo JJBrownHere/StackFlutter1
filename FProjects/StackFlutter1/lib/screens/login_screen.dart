@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show Supabase, OAuthProvider;
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase, OAuthProvider, Provider, AuthOptions;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
@@ -67,9 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (kIsWeb) {
-        await Supabase.instance.client.auth.signInWithOAuth(
-          OAuthProvider.google,
-          redirectTo: 'https://itscrazyamazing.com/',
+        await Supabase.instance.client.auth.signInWithProvider(
+          Provider.google,
+          options: AuthOptions(redirectTo: 'https://itscrazyamazing.com/'),
         );
         setState(() {
           _isLoading = false;
@@ -135,9 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (kIsWeb) {
-        await Supabase.instance.client.auth.signInWithOAuth(
-          OAuthProvider.apple,
-          redirectTo: 'https://itscrazyamazing.com/',
+        await Supabase.instance.client.auth.signInWithProvider(
+          Provider.apple,
+          options: AuthOptions(redirectTo: 'https://itscrazyamazing.com/'),
         );
         setState(() {
           _isLoading = false;
