@@ -26,9 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
-      handleIncomingLinks(context);
-    }
+    handleIncomingLinks(context);
   }
 
   Future<void> _handleGoogleSignIn() async {
@@ -40,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (kIsWeb) {
         await Supabase.instance.client.auth.signInWithOAuth(
           OAuthProvider.google,
-          redirectTo: 'https://itscrazyamazing.com/',
+          redirectTo: 'https://itscrazyamazing.com/auth-callback',
         );
         setState(() {
           _isLoading = false;
@@ -48,24 +46,36 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       } else {
         final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        print('googleUser: $googleUser');
         if (googleUser == null) return;
 
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-        final accessToken = googleAuth.accessToken;
-        final idToken = googleAuth.idToken;
-
-        if (accessToken == null) {
-          throw 'No Access Token found!';
+        print('googleAuth: $googleAuth');
+        print('idToken: \\${googleAuth.idToken}');
+        print('accessToken: \\${googleAuth.accessToken}');
+        if (googleAuth == null || googleAuth.idToken == null || googleAuth.accessToken == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Google authentication failed.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
         }
-        if (idToken == null) {
-          throw 'No ID Token found!';
-        }
-
         await Supabase.instance.client.auth.signInWithIdToken(
           provider: OAuthProvider.google,
-          idToken: idToken,
-          accessToken: accessToken,
+          idToken: googleAuth.idToken!,
+          accessToken: googleAuth.accessToken,
         );
+        print('Session after Google login: \\${Supabase.instance.client.auth.currentSession}');
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       }
     } catch (error) {
       if (mounted) {
@@ -94,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (kIsWeb) {
         await Supabase.instance.client.auth.signInWithOAuth(
           OAuthProvider.apple,
-          redirectTo: 'https://itscrazyamazing.com/',
+          redirectTo: 'https://itscrazyamazing.com/auth-callback',
         );
         setState(() {
           _isLoading = false;
@@ -107,11 +117,16 @@ class _LoginScreenState extends State<LoginScreen> {
             AppleIDAuthorizationScopes.fullName,
           ],
         );
-
         await Supabase.instance.client.auth.signInWithIdToken(
           provider: OAuthProvider.apple,
           idToken: credential.identityToken!,
         );
+        print('Session after Apple login: \\${Supabase.instance.client.auth.currentSession}');
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       }
     } catch (error) {
       if (mounted) {
