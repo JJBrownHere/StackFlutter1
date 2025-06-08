@@ -8,7 +8,7 @@ import '../helpers/session_helper.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void _handleLogout(BuildContext context) async {
+  Future<void> _handleLogout(BuildContext context) async {
     await Supabase.instance.client.auth.signOut();
     // Navigate to login screen after logout
     Navigator.of(context).pushReplacementNamed('/login');
