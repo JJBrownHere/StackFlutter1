@@ -17,8 +17,8 @@ CNAME_PATH="../../CNAME"
 if [ -f "$CNAME_PATH" ]; then
   cp "$CNAME_PATH" build/web/CNAME
   echo "CNAME file copied successfully."
-  git add build/web/CNAME
-  git commit -m "chore: add CNAME to web build output" || echo "No changes to commit for CNAME"
+  git add -f build/web/CNAME
+  git commit -m "chore: force add CNAME to web build output" || echo "No changes to commit for CNAME"
 else
   echo "Error: CNAME file not found at $CNAME_PATH"
   exit 1
