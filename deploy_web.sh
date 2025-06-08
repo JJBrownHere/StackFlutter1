@@ -13,7 +13,14 @@ cd FProjects/StackFlutter1
 flutter build web
 
 # Copy CNAME file into the build output
-cp ../../CNAME build/web/CNAME
+CNAME_PATH="../../CNAME"
+if [ -f "$CNAME_PATH" ]; then
+  cp "$CNAME_PATH" build/web/CNAME
+  echo "CNAME file copied successfully."
+else
+  echo "Error: CNAME file not found at $CNAME_PATH"
+  exit 1
+fi
 
 # Deploy to gh-pages using subtree split
 cd ../..
