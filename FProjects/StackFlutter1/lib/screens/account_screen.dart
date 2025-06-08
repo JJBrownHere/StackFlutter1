@@ -187,6 +187,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     await Supabase.instance.client.auth.signOut();
+                    globalRefreshSession(context);
                     if (mounted) {
                       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
                     }

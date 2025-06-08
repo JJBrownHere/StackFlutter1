@@ -1,0 +1,53 @@
+name: auth_app
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.1 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  
+  # Authentication
+  google_sign_in: 5.4.4
+  sign_in_with_apple: ^7.0.1
+  supabase_flutter: ^2.9.0
+  supabase: ^2.7.0
+
+  # UI
+  flutter_svg: ^2.1.0
+
+  # State Management
+  provider: ^6.1.5
+
+  # Network
+  http: ^1.4.0
+  path_provider: ^2.1.5
+  path_provider_android: ^2.2.17
+  url_launcher: ^6.2.5
+
+  # Deep Link
+  app_links: 3.5.1
+
+  # Camera
+  camera: ^0.10.5+9
+  permission_handler: ^11.3.0
+  image_picker: ^1.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/google_logo.svg 

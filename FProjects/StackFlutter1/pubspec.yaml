@@ -36,9 +36,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   
   # Authentication
-  google_sign_in: ^6.2.1
+  google_sign_in: ^6.3.0
   sign_in_with_apple: ^7.0.1
-  supabase_flutter: ^2.3.4
+  supabase_flutter: ^2.9.0
+  supabase: ^2.7.0
+  gotrue: ^2.12.0
 
   # UI
   flutter_svg: ^2.1.0
@@ -50,15 +52,14 @@ dependencies:
   http: ^1.4.0
   path_provider: ^2.1.5
   path_provider_android: ^2.2.17
-  url_launcher: ^6.2.5
 
   # Deep Link
   uni_links: ^0.5.1
 
-  # Camera
-  camera: ^0.10.5+9
-  permission_handler: ^11.3.0
+  # Additional dependencies
   image_picker: ^1.0.7
+  permission_handler: ^12.0.0+1
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:
