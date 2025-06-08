@@ -10,8 +10,8 @@ class HomeScreen extends StatelessWidget {
 
   Future<void> _handleLogout(BuildContext context) async {
     await Supabase.instance.client.auth.signOut();
-    // Navigate to login screen after logout
-    Navigator.of(context).pushReplacementNamed('/login');
+    globalRefreshSession(context);
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
   }
 
   Future<void> _launchUrl(String url) async {
