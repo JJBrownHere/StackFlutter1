@@ -1,23 +1,17 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Redirecting...</title>
-    <script type="text/javascript">
-      // Get the current path and query parameters
-      var path = window.location.pathname;
-      var search = window.location.search;
-      var hash = window.location.hash;
-      
-      // Remove /auth-callback from the path if present
-      var cleanPath = path.replace('/auth-callback', '');
-      
-      // Redirect to index.html with the original path and parameters
-      var redirectTo = '/index.html' + search + hash;
-      window.location.replace(redirectTo);
-    </script>
-  </head>
-  <body>
-    <p>Redirecting...</p>
-  </body>
-</html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    // Redirect to index.html, preserving path, search, and hash
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+    window.location.replace('/index.html' + path + search + hash);
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html> 
