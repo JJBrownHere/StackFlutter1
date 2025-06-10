@@ -4,11 +4,8 @@
   <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    // Redirect to index.html, preserving path, search, and hash
-    var path = window.location.pathname;
-    var search = window.location.search;
-    var hash = window.location.hash;
-    window.location.replace('/index.html' + path + search + hash);
+    // Always redirect to root, preserving search and hash
+    window.location.replace('/' + window.location.search + window.location.hash);
   </script>
 </head>
 <body>
