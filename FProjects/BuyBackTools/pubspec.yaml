@@ -33,23 +33,23 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.6
   
   # Authentication
-  google_sign_in: ^6.3.0
+  google_sign_in: ^6.2.1
   sign_in_with_apple: ^7.0.1
   supabase_flutter: ^2.9.0
   supabase: ^2.7.0
   gotrue: ^2.12.0
 
   # UI
-  flutter_svg: ^2.1.0
+  flutter_svg: ^2.0.10+1
 
   # State Management
   provider: ^6.1.2
 
   # Network
-  http: ^1.4.0
+  http: ^1.2.0
   path_provider: ^2.1.2
   path_provider_android: ^2.1.1
 
@@ -72,7 +72,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
