@@ -166,10 +166,19 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   String? _extractSheetId(String input) {
+    // Try to match regular Google Sheets URL format
     final reg = RegExp(r'/d/([a-zA-Z0-9-_]+)');
     final match = reg.firstMatch(input);
     if (match != null) return match.group(1);
-    if (input.length > 20 && !input.contains('/')) return input; // likely an ID
+    
+    // Try to match published HTML URL format
+    final pubReg = RegExp(r'/d/e/([a-zA-Z0-9-_]+)');
+    final pubMatch = pubReg.firstMatch(input);
+    if (pubMatch != null) return pubMatch.group(1);
+    
+    // If it's just a long string without slashes, assume it's an ID
+    if (input.length > 20 && !input.contains('/')) return input;
+    
     return null;
   }
 
