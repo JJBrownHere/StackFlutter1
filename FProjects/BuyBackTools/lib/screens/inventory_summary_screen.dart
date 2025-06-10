@@ -76,12 +76,20 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   void _onSheetPicked(String id) {
+    print('DEBUG: Sheet picked with ID: $id');
     final extractedId = _extractSheetId(id);
-    if (kIsWeb) {
-      // Debug log for web
-      // ignore: avoid_print
-      print('Picked sheet input: $id, extracted ID: $extractedId');
+    print('DEBUG: Extracted sheet ID: $extractedId');
+    
+    if (extractedId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid Google Sheet URL or ID'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
+    
     setState(() {
       _sheetId = extractedId;
       _summary = null;
@@ -166,19 +174,33 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   String? _extractSheetId(String input) {
+    print('DEBUG: Extracting sheet ID from input: $input');
+    
     // Try to match regular Google Sheets URL format
     final reg = RegExp(r'/d/([a-zA-Z0-9-_]+)');
     final match = reg.firstMatch(input);
-    if (match != null) return match.group(1);
+    if (match != null) {
+      final id = match.group(1);
+      print('DEBUG: Found regular sheet ID: $id');
+      return id;
+    }
     
     // Try to match published HTML URL format
     final pubReg = RegExp(r'/d/e/([a-zA-Z0-9-_]+)');
     final pubMatch = pubReg.firstMatch(input);
-    if (pubMatch != null) return pubMatch.group(1);
+    if (pubMatch != null) {
+      final id = pubMatch.group(1);
+      print('DEBUG: Found published sheet ID: $id');
+      return id;
+    }
     
     // If it's just a long string without slashes, assume it's an ID
-    if (input.length > 20 && !input.contains('/')) return input;
+    if (input.length > 20 && !input.contains('/')) {
+      print('DEBUG: Using input as direct sheet ID');
+      return input;
+    }
     
+    print('DEBUG: No valid sheet ID found in input');
     return null;
   }
 

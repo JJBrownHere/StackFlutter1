@@ -23,28 +23,40 @@ class SheetService {
     if (kIsWeb) {
       // Use published HTML for web
       final publishedUrl = 'https://docs.google.com/spreadsheets/d/e/$spreadsheetId/pubhtml';
-      print('Fetching from published URL: $publishedUrl');
-      final response = await http.get(Uri.parse(publishedUrl));
-      if (response.statusCode != 200) {
-        print('Failed to fetch sheet HTML. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        throw Exception('Failed to fetch sheet HTML: ${response.statusCode}');
+      print('DEBUG: Attempting to fetch from URL: $publishedUrl');
+      print('DEBUG: Spreadsheet ID being used: $spreadsheetId');
+      
+      try {
+        final response = await http.get(Uri.parse(publishedUrl));
+        print('DEBUG: Response status code: ${response.statusCode}');
+        print('DEBUG: Response headers: ${response.headers}');
+        if (response.statusCode != 200) {
+          print('DEBUG: Error response body: ${response.body}');
+          throw Exception('Failed to fetch sheet HTML: ${response.statusCode}');
+        }
+        
+        final document = html_parser.parse(response.body);
+        final table = document.querySelector('table');
+        if (table == null) {
+          print('DEBUG: HTML content received: ${response.body}');
+          throw Exception('No table found in sheet HTML');
+        }
+        
+        final rows = <List<String>>[];
+        for (final row in table.querySelectorAll('tr')) {
+          final cells = row.querySelectorAll('td, th').map((cell) => cell.text.trim()).toList();
+          rows.add(cells);
+        }
+        print('DEBUG: Successfully parsed ${rows.length} rows');
+        if (rows.isNotEmpty) {
+          print('DEBUG: First row headers: ${rows[0]}');
+        }
+        return rows;
+      } catch (e, stack) {
+        print('DEBUG: Error in web sheet fetch: $e');
+        print('DEBUG: Stack trace: $stack');
+        rethrow;
       }
-      final document = html_parser.parse(response.body);
-      final table = document.querySelector('table');
-      if (table == null) {
-        print('No table found in HTML response');
-        print('HTML content: ${response.body}');
-        throw Exception('No table found in sheet HTML');
-      }
-      final rows = <List<String>>[];
-      for (final row in table.querySelectorAll('tr')) {
-        final cells = row.querySelectorAll('td, th').map((cell) => cell.text.trim()).toList();
-        rows.add(cells);
-      }
-      print('Parsed HTML rows count: ${rows.length}');
-      if (rows.isNotEmpty) print('First parsed HTML row: ${rows[0]}');
-      return rows;
     } else {
       try {
         String? accessToken;
