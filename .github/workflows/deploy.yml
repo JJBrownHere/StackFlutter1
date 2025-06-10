@@ -23,19 +23,22 @@ jobs:
       
       - name: Enable web
         run: flutter config --enable-web
+        working-directory: FProjects/BuyBackTools
         
       - name: Get dependencies
         run: flutter pub get
+        working-directory: FProjects/BuyBackTools
         
       - name: Build web
         run: flutter build web --release --web-renderer canvaskit --base-href /
+        working-directory: FProjects/BuyBackTools
         
       - name: Configure custom domain
-        run: echo "itscrazyamazing.com" > build/web/CNAME
+        run: echo "itscrazyamazing.com" > FProjects/BuyBackTools/build/web/CNAME
         
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+          publish_dir: FProjects/BuyBackTools/build/web
           commit_message: "Deploy web app" 
