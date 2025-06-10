@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import '../secrets.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SheetService {
   static const String _spreadsheetId = '120gf3lHO7LOZDoD_F5GqLMSUKwBzjE5XhFDWwIVdoJs';
@@ -18,14 +19,27 @@ class SheetService {
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     String? accessToken;
-    try {
+    if (kIsWeb) {
+      // On web, require Google OAuth sign-in and use the access token
       final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
       if (googleUser != null) {
         final auth = await googleUser.authentication;
         accessToken = auth.accessToken;
       }
-    } catch (_) {
-      // Ignore sign-in errors for public sheets
+      if (accessToken == null) {
+        throw Exception('You must sign in with Google to access Sheets on web.');
+      }
+    } else {
+      // On mobile, try OAuth, else fallback to API key
+      try {
+        final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+        if (googleUser != null) {
+          final auth = await googleUser.authentication;
+          accessToken = auth.accessToken;
+        }
+      } catch (_) {
+        // Ignore sign-in errors for public sheets
+      }
     }
 
     String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
@@ -33,13 +47,13 @@ class SheetService {
     if (accessToken != null) {
       headers['Authorization'] = 'Bearer $accessToken';
     } else {
-      // Add API key for public access
+      // Add API key for public access (mobile only)
       url += '?key=$_apiKey';
     }
     // Debug log for web
     // ignore: avoid_print
-    if (identical(0, 0.0)) {
-      print('Google Sheets API call: url=$url, apiKey=$_apiKey, spreadsheetId=$spreadsheetId');
+    if (kIsWeb) {
+      print('Google Sheets API call (web OAuth): url=$url, accessToken=${accessToken != null}');
     }
     final response = await http.get(Uri.parse(url), headers: headers);
     if (response.statusCode != 200) {
