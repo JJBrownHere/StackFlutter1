@@ -22,19 +22,28 @@ class SheetService {
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
       // Use published HTML for web
-      final publishedUrl = 'https://docs.google.com/spreadsheets/d/$spreadsheetId/pubhtml';
+      final publishedUrl = 'https://docs.google.com/spreadsheets/d/e/$spreadsheetId/pubhtml';
+      print('Fetching from published URL: $publishedUrl');
       final response = await http.get(Uri.parse(publishedUrl));
-      if (response.statusCode != 200) throw Exception('Failed to fetch sheet HTML');
+      if (response.statusCode != 200) {
+        print('Failed to fetch sheet HTML. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to fetch sheet HTML: ${response.statusCode}');
+      }
       final document = html_parser.parse(response.body);
       final table = document.querySelector('table');
-      if (table == null) throw Exception('No table found in sheet HTML');
+      if (table == null) {
+        print('No table found in HTML response');
+        print('HTML content: ${response.body}');
+        throw Exception('No table found in sheet HTML');
+      }
       final rows = <List<String>>[];
       for (final row in table.querySelectorAll('tr')) {
         final cells = row.querySelectorAll('td, th').map((cell) => cell.text.trim()).toList();
         rows.add(cells);
       }
-      print('Parsed HTML rows count: \\${rows.length}');
-      if (rows.isNotEmpty) print('First parsed HTML row: \\${rows[0]}');
+      print('Parsed HTML rows count: ${rows.length}');
+      if (rows.isNotEmpty) print('First parsed HTML row: ${rows[0]}');
       return rows;
     }
     try {
