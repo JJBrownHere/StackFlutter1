@@ -94,12 +94,12 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
     if (user != null) {
       await Supabase.instance.client.from('inventorySheets').insert({
         'user_id': user.id,
-        'sheet_id': sheetId,
+        'sheet_id': _extractSheetId(sheetId),
         'sheet_tab': _sheetTab,
         'created_at': DateTime.now().toIso8601String(),
       });
       setState(() {
-        _sheetId = sheetId;
+        _sheetId = _extractSheetId(sheetId);
       });
       await _loadSummary();
     }
@@ -228,7 +228,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
         .limit(1);
     if (sheets != null && sheets.isNotEmpty) {
       setState(() {
-        _sheetId = sheets[0]['sheet_id'];
+        _sheetId = _extractSheetId(sheets[0]['sheet_id'] ?? '');
         _sheetTab = sheets[0]['sheet_tab'] ?? 'Smartphone';
       });
     }
