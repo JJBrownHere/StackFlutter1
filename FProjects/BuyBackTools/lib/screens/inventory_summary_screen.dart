@@ -20,6 +20,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   String? _sheetId;
   String _sheetTab = 'Smartphone';
   final _sheetController = TextEditingController();
+  String? _sheetGid;
 
   @override
   void dispose() {
@@ -51,23 +52,23 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   Future<void> _loadSummary() async {
-    if (_sheetId == null || _sheetId!.isEmpty) return;
-    if (kIsWeb) {
-      // ignore: avoid_print
-      print('Loading summary for sheetId: \\$_sheetId');
-    }
+    if (_sheetId == null) return;
+    
     setState(() {
       _isLoading = true;
       _error = null;
     });
+    
     try {
-      final summary = await _sheetService.getPhoneSummary(_sheetId!, _sheetTab);
+      print('DEBUG: Loading summary for sheet ID: $_sheetId, gid: $_sheetGid');
+      final summary = await _sheetService.getPhoneSummary(_sheetId!, _sheetGid ?? '0');
       setState(() {
         _summary = summary;
         _isLoading = false;
       });
       await _saveSummaryToSupabase(summary);
     } catch (e) {
+      print('DEBUG: Error loading summary: $e');
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -181,16 +182,17 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
     final match = reg.firstMatch(input);
     if (match != null) {
       final id = match.group(1);
-      print('DEBUG: Found regular sheet ID: $id');
-      return id;
-    }
-    
-    // Try to match published HTML URL format
-    final pubReg = RegExp(r'/d/e/([a-zA-Z0-9-_]+)');
-    final pubMatch = pubReg.firstMatch(input);
-    if (pubMatch != null) {
-      final id = pubMatch.group(1);
-      print('DEBUG: Found published sheet ID: $id');
+      print('DEBUG: Found sheet ID: $id');
+      
+      // Try to extract gid parameter
+      final gidMatch = RegExp(r'[?&]gid=(\d+)').firstMatch(input);
+      if (gidMatch != null) {
+        final gid = gidMatch.group(1);
+        print('DEBUG: Found sheet gid: $gid');
+        // Store the gid for later use
+        _sheetGid = gid;
+      }
+      
       return id;
     }
     

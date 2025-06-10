@@ -5,6 +5,7 @@ import '../secrets.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart';
+import 'package:csv/csv.dart';
 
 class SheetService {
   static const String _spreadsheetId = '120gf3lHO7LOZDoD_F5GqLMSUKwBzjE5XhFDWwIVdoJs';
@@ -21,43 +22,30 @@ class SheetService {
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
-      // Use published HTML for web
-      final publishedUrl = 'https://docs.google.com/spreadsheets/d/e/$spreadsheetId/pubhtml';
-      print('DEBUG: Attempting to fetch from URL: $publishedUrl');
-      print('DEBUG: Spreadsheet ID being used: $spreadsheetId');
+      // For web, use the direct sheet URL format with proper sheet ID
+      final sheetUrl = 'https://docs.google.com/spreadsheets/d/$spreadsheetId/export?format=csv&gid=$sheetName';
+      print('DEBUG: Using direct sheet URL: $sheetUrl');
       
       try {
-        final response = await http.get(Uri.parse(publishedUrl));
+        final response = await http.get(Uri.parse(sheetUrl));
         print('DEBUG: Response status code: ${response.statusCode}');
         print('DEBUG: Response headers: ${response.headers}');
         if (response.statusCode != 200) {
           print('DEBUG: Error response body: ${response.body}');
-          throw Exception('Failed to fetch sheet HTML: ${response.statusCode}');
+          throw Exception('Failed to fetch sheet data: ${response.statusCode}');
         }
         
-        final document = html_parser.parse(response.body);
-        final table = document.querySelector('table');
-        if (table == null) {
-          print('DEBUG: HTML content received: ${response.body}');
-          throw Exception('No table found in sheet HTML');
-        }
-        
-        final rows = <List<String>>[];
-        for (final row in table.querySelectorAll('tr')) {
-          final cells = row.querySelectorAll('td, th').map((cell) => cell.text.trim()).toList();
-          rows.add(cells);
-        }
+        // Parse CSV response
+        final rows = const CsvToListConverter().convert(response.body);
         print('DEBUG: Successfully parsed ${rows.length} rows');
-        if (rows.isNotEmpty) {
-          print('DEBUG: First row headers: ${rows[0]}');
-        }
-        return rows;
+        return rows.map((row) => row.map((cell) => cell.toString()).toList()).toList();
       } catch (e, stack) {
         print('DEBUG: Error in web sheet fetch: $e');
         print('DEBUG: Stack trace: $stack');
         rethrow;
       }
     } else {
+      // Mobile path - keep existing code unchanged
       try {
         String? accessToken;
         try {
