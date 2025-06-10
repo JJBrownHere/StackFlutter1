@@ -59,14 +59,21 @@ class SheetService {
       }
       final response = await http.get(Uri.parse(url), headers: headers);
       print('Sheets API raw response: ${response.body}');
-      if (response.statusCode != 200) {
-        throw Exception('Failed to fetch sheet: ${response.body}');
+      dynamic data;
+      try {
+        data = json.decode(response.body);
+        print('Decoded API response: $data');
+      } catch (e) {
+        print('JSON decode error: $e');
+        throw Exception('Failed to decode Sheets API response as JSON. Raw response: ${response.body}');
       }
-      final data = json.decode(response.body);
-      print('Decoded API response: $data');
-      final valuesRaw = data['values'];
-      if (valuesRaw == null || valuesRaw is! List) return [];
+      if (data is Map && data.containsKey('error')) {
+        print('Google API error: ${data['error']}');
+        throw Exception('Google API error: ${data['error']}');
+      }
+      final valuesRaw = data is Map && data.containsKey('values') ? data['values'] : null;
       print('Raw values array: $valuesRaw');
+      if (valuesRaw == null || valuesRaw is! List) throw Exception('No usable rows found in sheet/tab. Raw response: $data');
       final parsedRows = valuesRaw
           .where((row) => row is List && row.isNotEmpty)
           .map((row) => (row as List)
