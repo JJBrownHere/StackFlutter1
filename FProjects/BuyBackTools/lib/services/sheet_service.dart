@@ -91,8 +91,13 @@ class SheetService {
     print('DEBUG: Sheet headers: ' + headers.join(', '));
     final hideIndex = headers.indexOf('hide');
     final soldIndex = headers.indexOf('SoldStatus');
-    if (hideIndex == -1 || soldIndex == -1) {
-      throw Exception("Missing required header(s): 'hide' or 'SoldStatus'. Headers found: "+headers.join(", "));
+    // Required fields for a valid product
+    final requiredFields = [
+      'ref', 'Brand', 'Model', 'Carrier', 'Storage', 'Condition', 'Price'
+    ];
+    final requiredIndexes = requiredFields.map((f) => headers.indexOf(f)).toList();
+    if (hideIndex == -1 || soldIndex == -1 || requiredIndexes.contains(-1)) {
+      throw Exception("Missing required header(s): 'hide', 'SoldStatus', or one of ${requiredFields.join(', ')}. Headers found: "+headers.join(", "));
     }
     final availablePhones = <Map<String, String>>[];
     for (var i = 1; i < rows.length; i++) {
@@ -100,7 +105,9 @@ class SheetService {
       if (row.length <= soldIndex || row.length <= hideIndex) continue;
       final isHidden = row[hideIndex].toLowerCase() == 'true';
       final isSold = row[soldIndex].isNotEmpty;
-      if (!isHidden && !isSold) {
+      // Check all required fields are present and non-empty
+      final hasAllRequired = requiredIndexes.every((idx) => idx < row.length && row[idx].trim().isNotEmpty);
+      if (!isHidden && !isSold && hasAllRequired) {
         final phoneData = <String, String>{};
         for (var j = 0; j < headers.length; j++) {
           if (j < row.length) {
