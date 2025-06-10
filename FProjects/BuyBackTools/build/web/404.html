@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <title>Redirecting...</title>
     <script type="text/javascript">
-      // If the user lands on a 404 page, redirect to index.html and preserve the path and hash
-      var redirectTo = '/index.html' + window.location.search + window.location.hash;
+      // Get the current path and query parameters
+      var path = window.location.pathname;
+      var search = window.location.search;
+      var hash = window.location.hash;
+      
+      // Remove /auth-callback from the path if present
+      var cleanPath = path.replace('/auth-callback', '');
+      
+      // Redirect to index.html with the original path and parameters
+      var redirectTo = '/index.html' + search + hash;
       window.location.replace(redirectTo);
     </script>
   </head>
