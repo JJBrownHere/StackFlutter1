@@ -1,24 +1,25 @@
-# STACKS Flutter Web App
+# BuyBackTools Flutter Application
 
-A modern Flutter web application with authentication and dashboard interface.
+A Flutter application for iPhone price checking and buyback tools.
 
 ## Features
 
-- Google and Apple Sign-In authentication using Supabase
-- Modern Material Design 3 UI
-- Responsive dashboard layout
-- Four main sections:
-  - IMEI Checks
-  - Price STACKS
-  - Inventory
-  - Purchase
+- iPhone model selection with accurate ordering
+- Storage capacity options
+- Condition grading system
+- Comprehensive price checking across:
+  - Graded Pricing (A, B, C, D grades)
+  - Trade-in Pricing (Apple, ATT, TMobile, Verizon)
+  - Seller Pricing (Gazelle, It's Worth More, Plug.Tech)
+- Responsive design for both mobile and desktop
+- Real-time price updates
 
 ## Tech Stack
 
-- Flutter Web
-- Supabase for authentication and backend
-- Google OAuth integration
-- Apple Sign-In integration
+- Flutter
+- Material Design 3
+- Responsive UI components
+- Price checking service integration
 
 ## Getting Started
 
@@ -26,40 +27,44 @@ A modern Flutter web application with authentication and dashboard interface.
 
 - Flutter SDK (latest version)
 - Dart SDK (latest version)
-- A Supabase account and project
-- Google Cloud Console project with OAuth credentials
-- Apple Developer account (for Apple Sign-In)
+- Price checking service credentials
 
 ### Installation
 
-1. Clone the repository:
+1. Navigate to the project directory:
 ```bash
-git clone https://github.com/jjbrownhere/StackFlutter1.git
+cd FProjects/BuyBackTools
 ```
 
-2. Navigate to the project directory:
-```bash
-cd StackFlutter1
-```
-
-3. Install dependencies:
+2. Install dependencies:
 ```bash
 flutter pub get
 ```
 
-4. Configure environment variables:
-   - Set up your Supabase URL and anon key
-   - Configure OAuth redirect URLs
-   - Set up Apple Sign-In credentials
+3. Configure environment variables:
+   - Set up your price checking service credentials
+   - Configure any necessary API keys
 
-5. Run the app:
+4. Run the app:
 ```bash
-flutter run -d chrome
+flutter run
 ```
 
 ## Development
 
-The project includes a developer bypass button in debug mode for easier testing and development.
+The application supports both web and mobile platforms with responsive design.
+
+## Project Structure
+
+```
+lib/
+├── screens/          # Screen widgets
+│   └── price_checks_screen.dart
+├── services/         # Business logic
+│   └── price_service.dart
+├── widgets/          # Reusable widgets
+└── helpers/          # Utility functions
+```
 
 ## License
 
