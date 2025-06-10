@@ -56,8 +56,9 @@ class SheetService {
       print('Google Sheets API call (web OAuth): url=$url, accessToken=${accessToken != null}');
     }
     final response = await http.get(Uri.parse(url), headers: headers);
+    print('Sheets API raw response: \\${response.body}');
     if (response.statusCode != 200) {
-      throw Exception('Failed to fetch sheet: ${response.body}');
+      throw Exception('Failed to fetch sheet: \\${response.body}');
     }
     final data = json.decode(response.body);
     final values = data['values'] as List<dynamic>?;
@@ -67,7 +68,8 @@ class SheetService {
 
   Future<List<Map<String, String>>> getAvailablePhones(String spreadsheetId, String sheetName) async {
     final rows = await _fetchSheetRows(spreadsheetId, sheetName);
-    if (rows.isEmpty) return [];
+    print('Fetched rows: \\${rows}');
+    if (rows.isEmpty) throw Exception('Sheet is empty or tab "$sheetName" does not exist.');
     final headers = rows[0];
     print('DEBUG: Sheet headers: ' + headers.join(', '));
     final hideIndex = headers.indexOf('hide');
