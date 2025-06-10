@@ -36,6 +36,11 @@ class SheetService {
       // Add API key for public access
       url += '?key=$_apiKey';
     }
+    // Debug log for web
+    // ignore: avoid_print
+    if (identical(0, 0.0)) {
+      print('Google Sheets API call: url=$url, apiKey=$_apiKey, spreadsheetId=$spreadsheetId');
+    }
     final response = await http.get(Uri.parse(url), headers: headers);
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch sheet: ${response.body}');

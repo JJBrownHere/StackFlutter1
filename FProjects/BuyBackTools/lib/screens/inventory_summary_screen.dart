@@ -52,6 +52,10 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
 
   Future<void> _loadSummary() async {
     if (_sheetId == null || _sheetId!.isEmpty) return;
+    if (kIsWeb) {
+      // ignore: avoid_print
+      print('Loading summary for sheetId: \\$_sheetId');
+    }
     setState(() {
       _isLoading = true;
       _error = null;
@@ -72,8 +76,14 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   void _onSheetPicked(String id) {
+    final extractedId = _extractSheetId(id);
+    if (kIsWeb) {
+      // Debug log for web
+      // ignore: avoid_print
+      print('Picked sheet input: $id, extracted ID: $extractedId');
+    }
     setState(() {
-      _sheetId = id;
+      _sheetId = extractedId;
       _summary = null;
     });
     _loadSummary();
