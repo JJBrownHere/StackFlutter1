@@ -18,52 +18,59 @@ class SheetService {
   );
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
-    String? accessToken;
-    if (kIsWeb) {
-      // On web, require Google OAuth sign-in and use the access token
-      final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
-      if (googleUser != null) {
-        final auth = await googleUser.authentication;
-        accessToken = auth.accessToken;
-      }
-      if (accessToken == null) {
-        throw Exception('You must sign in with Google to access Sheets on web.');
-      }
-    } else {
-      // On mobile, try OAuth, else fallback to API key
-      try {
+    try {
+      String? accessToken;
+      if (kIsWeb) {
+        print('Attempting Google sign-in (web)...');
         final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+        print('Google user: $googleUser');
         if (googleUser != null) {
           final auth = await googleUser.authentication;
+          print('Google auth: $auth');
           accessToken = auth.accessToken;
         }
-      } catch (_) {
-        // Ignore sign-in errors for public sheets
+        if (accessToken == null) {
+          throw Exception('You must sign in with Google to access Sheets on web.');
+        }
+      } else {
+        try {
+          print('Attempting Google sign-in (mobile)...');
+          final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+          print('Google user: $googleUser');
+          if (googleUser != null) {
+            final auth = await googleUser.authentication;
+            print('Google auth: $auth');
+            accessToken = auth.accessToken;
+          }
+        } catch (e) {
+          print('Google sign-in error: $e');
+        }
       }
-    }
 
-    String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
-    final headers = <String, String>{};
-    if (accessToken != null) {
-      headers['Authorization'] = 'Bearer $accessToken';
-    } else {
-      // Add API key for public access (mobile only)
-      url += '?key=$_apiKey';
+      String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
+      final headers = <String, String>{};
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      } else {
+        url += '?key=$_apiKey';
+      }
+      if (kIsWeb) {
+        print('Google Sheets API call (web OAuth): url=$url, accessToken=${accessToken != null}');
+      }
+      final response = await http.get(Uri.parse(url), headers: headers);
+      print('Sheets API raw response: ${response.body}');
+      if (response.statusCode != 200) {
+        throw Exception('Failed to fetch sheet: ${response.body}');
+      }
+      final data = json.decode(response.body);
+      print('Decoded API response: $data');
+      final values = data['values'] as List<dynamic>?;
+      if (values == null) return [];
+      return values.map((row) => List<String>.from(row.map((cell) => cell.toString()))).toList();
+    } catch (e, stack) {
+      print('Error in _fetchSheetRows: $e\n$stack');
+      rethrow;
     }
-    // Debug log for web
-    // ignore: avoid_print
-    if (kIsWeb) {
-      print('Google Sheets API call (web OAuth): url=$url, accessToken=${accessToken != null}');
-    }
-    final response = await http.get(Uri.parse(url), headers: headers);
-    print('Sheets API raw response: \\${response.body}');
-    if (response.statusCode != 200) {
-      throw Exception('Failed to fetch sheet: \\${response.body}');
-    }
-    final data = json.decode(response.body);
-    final values = data['values'] as List<dynamic>?;
-    if (values == null) return [];
-    return values.map((row) => List<String>.from(row.map((cell) => cell.toString()))).toList();
   }
 
   Future<List<Map<String, String>>> getAvailablePhones(String spreadsheetId, String sheetName) async {
