@@ -58,7 +58,7 @@ dependencies:
 
   # Additional dependencies
   image_picker: ^1.0.7
-  permission_handler: ^12.0.0+1
+  permission_handler: ^11.3.0
   url_launcher: ^6.2.5
 
   gsheets: ^0.5.0
