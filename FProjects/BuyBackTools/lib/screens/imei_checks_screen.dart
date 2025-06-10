@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../helpers/keyboard_dismiss_wrapper.dart';
 
 class ImeiChecksScreen extends StatefulWidget {
   const ImeiChecksScreen({super.key});
@@ -75,40 +76,42 @@ class _ImeiChecksScreenState extends State<ImeiChecksScreen> {
       appBar: AppBar(
         title: const Text('IMEI Checks'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _imeiController,
-              decoration: InputDecoration(
-                labelText: 'IMEI/Serial Number',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.camera_alt),
-                  onPressed: _isLoading ? null : _startScanning,
+      body: KeyboardDismissOnTap(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _imeiController,
+                decoration: InputDecoration(
+                  labelText: 'IMEI/Serial Number',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.camera_alt),
+                    onPressed: _isLoading ? null : _startScanning,
+                  ),
                 ),
+                keyboardType: TextInputType.number,
+                maxLength: 15,
               ),
-              keyboardType: TextInputType.number,
-              maxLength: 15,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implement IMEI check logic
-              },
-              child: const Text('Check IMEI'),
-            ),
-          ],
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // TODO: Implement IMEI check logic
+                },
+                child: const Text('Check IMEI'),
+              ),
+            ],
+          ),
         ),
       ),
     );

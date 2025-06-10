@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import '../services/price_service.dart';
+import '../helpers/keyboard_dismiss_wrapper.dart';
 
 class PriceChecksScreen extends StatefulWidget {
   const PriceChecksScreen({super.key});
@@ -625,61 +626,63 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildDropdown(
-              label: 'iPhone Model',
-              value: _selectedModel,
-              items: _models,
-              onChanged: (value) {
-                setState(() {
-                  _selectedModel = value;
-                });
-                if (value != null) {
-                  _loadStorageOptions(value);
-                }
-              },
-            ),
-            _buildDropdown(
-              label: 'Storage',
-              value: _selectedStorage,
-              items: _storageOptions,
-              isLoading: _isLoadingStorage,
-              onChanged: (value) {
-                setState(() {
-                  _selectedStorage = value;
-                });
-                if (value != null && _selectedModel != null) {
-                  _loadConditions(_selectedModel!, value);
-                }
-              },
-            ),
-            _buildDropdown(
-              label: 'Condition',
-              value: _selectedCondition,
-              items: _conditions,
-              isLoading: _isLoadingConditions,
-              onChanged: (value) {
-                setState(() {
-                  _selectedCondition = value;
-                });
-              },
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _selectedModel != null &&
-                      _selectedStorage != null &&
-                      _selectedCondition != null
-                  ? _fetchPriceData
-                  : null,
-              child: const Text('Get Price'),
-            ),
-            const SizedBox(height: 24),
-            _buildPriceDisplay(),
-          ],
+      body: KeyboardDismissOnTap(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildDropdown(
+                label: 'iPhone Model',
+                value: _selectedModel,
+                items: _models,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedModel = value;
+                  });
+                  if (value != null) {
+                    _loadStorageOptions(value);
+                  }
+                },
+              ),
+              _buildDropdown(
+                label: 'Storage',
+                value: _selectedStorage,
+                items: _storageOptions,
+                isLoading: _isLoadingStorage,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedStorage = value;
+                  });
+                  if (value != null && _selectedModel != null) {
+                    _loadConditions(_selectedModel!, value);
+                  }
+                },
+              ),
+              _buildDropdown(
+                label: 'Condition',
+                value: _selectedCondition,
+                items: _conditions,
+                isLoading: _isLoadingConditions,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCondition = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _selectedModel != null &&
+                        _selectedStorage != null &&
+                        _selectedCondition != null
+                    ? _fetchPriceData
+                    : null,
+                child: const Text('Get Price'),
+              ),
+              const SizedBox(height: 24),
+              _buildPriceDisplay(),
+            ],
+          ),
         ),
       ),
     );

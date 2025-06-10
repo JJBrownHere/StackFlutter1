@@ -8,6 +8,7 @@ import 'home_screen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import '../helpers/session_helper.dart';
+import '../helpers/keyboard_dismiss_wrapper.dart';
 // Conditional import for mobile deep link handling
 import 'login_links_mobile.dart'
   if (dart.library.html) 'login_links_stub.dart';
@@ -157,74 +158,76 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Welcome to STACKS',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              if (_isLoading)
-                const Center(
-                  child: CircularProgressIndicator(),
-                )
-              else ...[
-                ElevatedButton(
-                  onPressed: _handleGoogleSignIn,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+      body: KeyboardDismissOnTap(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Welcome to STACKS',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/google_logo.svg',
-                        height: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text('Sign in with Google'),
-                    ],
-                  ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
-                SignInWithAppleButton(
-                  onPressed: _handleAppleSignIn,
-                  style: SignInWithAppleButtonStyle.black,
-                ),
-                if (kDebugMode) ...[
-                  const SizedBox(height: 32),
-                  const Divider(),
-                  const SizedBox(height: 16),
+                const SizedBox(height: 48),
+                if (_isLoading)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                else ...[
                   ElevatedButton(
-                    onPressed: _handleDevBypass,
+                    onPressed: _handleGoogleSignIn,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(16),
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.developer_mode),
-                        SizedBox(width: 12),
-                        Text('Developer Bypass'),
+                        SvgPicture.asset(
+                          'assets/images/google_logo.svg',
+                          height: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        const Text('Sign in with Google'),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  SignInWithAppleButton(
+                    onPressed: _handleAppleSignIn,
+                    style: SignInWithAppleButtonStyle.black,
+                  ),
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 32),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _handleDevBypass,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        backgroundColor: Colors.grey[800],
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.developer_mode),
+                          SizedBox(width: 12),
+                          Text('Developer Bypass'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ],
-            ],
+            ),
           ),
         ),
       ),

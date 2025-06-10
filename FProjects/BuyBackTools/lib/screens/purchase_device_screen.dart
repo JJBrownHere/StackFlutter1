@@ -5,6 +5,8 @@ import '../widgets/neo_stepper.dart';
 import '../widgets/device_selection.dart';
 import '../widgets/device_details_form.dart';
 import '../widgets/seller_info_form.dart';
+import '../widgets/keyboard_dismiss_on_tap.dart';
+import '../helpers/keyboard_dismiss_wrapper.dart';
 
 class PurchaseDeviceScreen extends StatefulWidget {
   const PurchaseDeviceScreen({super.key});
@@ -154,79 +156,81 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: NeoStepper(
-                currentStep: _currentStep,
-                steps: _steps,
+      body: KeyboardDismissOnTap(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: NeoStepper(
+                  currentStep: _currentStep,
+                  steps: _steps,
+                ),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getStepTitle(),
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2D3436),
-                          letterSpacing: 0.5,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getStepTitle(),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2D3436),
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _getStepDescription(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF7A8C98),
-                          letterSpacing: 0.3,
+                        const SizedBox(height: 8),
+                        Text(
+                          _getStepDescription(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF7A8C98),
+                            letterSpacing: 0.3,
+                          ),
                         ),
-                      ),
-                      _buildStepContent(),
-                      const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (_currentStep > 0)
+                        _buildStepContent(),
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (_currentStep > 0)
+                              NeoButton(
+                                width: 120,
+                                onPressed: _handlePreviousStep,
+                                child: const Text(
+                                  'Previous',
+                                  style: TextStyle(
+                                    color: Color(0xFF2D3436),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            else
+                              const SizedBox(width: 120),
                             NeoButton(
                               width: 120,
-                              onPressed: _handlePreviousStep,
-                              child: const Text(
-                                'Previous',
-                                style: TextStyle(
+                              onPressed: _handleNextStep,
+                              child: Text(
+                                _currentStep == _steps.length - 1 ? 'Finish' : 'Next',
+                                style: const TextStyle(
                                   color: Color(0xFF2D3436),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            )
-                          else
-                            const SizedBox(width: 120),
-                          NeoButton(
-                            width: 120,
-                            onPressed: _handleNextStep,
-                            child: Text(
-                              _currentStep == _steps.length - 1 ? 'Finish' : 'Next',
-                              style: const TextStyle(
-                                color: Color(0xFF2D3436),
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

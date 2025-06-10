@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/sheet_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import '../helpers/keyboard_dismiss_wrapper.dart';
 
 class InventorySummaryScreen extends StatefulWidget {
   const InventorySummaryScreen({super.key});
@@ -150,75 +151,77 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inventory Summary'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _sheetId == null || _sheetId!.isEmpty ? null : _loadSummary,
-          ),
-        ],
-      ),
-      resizeToAvoidBottomInset: true,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSheetPicker(),
-              const SizedBox(height: 16),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator()),
-              if (_error != null)
-                Center(
-                  child: Text(
-                    'Error loading data: $_error',
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+    return KeyboardDismissOnTap(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Inventory Summary'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _sheetId == null || _sheetId!.isEmpty ? null : _loadSummary,
+            ),
+          ],
+        ),
+        resizeToAvoidBottomInset: true,
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSheetPicker(),
+                const SizedBox(height: 16),
+                if (_isLoading)
+                  const Center(child: CircularProgressIndicator()),
+                if (_error != null)
+                  Center(
+                    child: Text(
+                      'Error loading data: $_error',
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-              if (!_isLoading && _summary != null)
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.6,
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total Available Phones',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                if (!_isLoading && _summary != null)
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Total Available Phones',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                _summary!['totalAvailable'].toString(),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                                Text(
+                                  _summary!['totalAvailable'].toString(),
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSummaryCard('By Model', _summary!['byModel']),
-                      _buildSummaryCard('By Storage', _summary!['byStorage']),
-                      _buildSummaryCard('By Color', _summary!['byColor']),
-                      _buildSummaryCard('By Condition', _summary!['byCondition']),
-                    ],
+                        const SizedBox(height: 16),
+                        _buildSummaryCard('By Model', _summary!['byModel']),
+                        _buildSummaryCard('By Storage', _summary!['byStorage']),
+                        _buildSummaryCard('By Color', _summary!['byColor']),
+                        _buildSummaryCard('By Condition', _summary!['byCondition']),
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
