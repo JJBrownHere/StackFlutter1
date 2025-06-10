@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/sheet_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../helpers/keyboard_dismiss_wrapper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InventorySummaryScreen extends StatefulWidget {
   const InventorySummaryScreen({super.key});
@@ -16,7 +18,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   Map<String, dynamic>? _summary;
   String? _error;
   String? _sheetId;
-  String _sheetTab = 'Phones';
+  String _sheetTab = 'Smartphone';
   final _sheetController = TextEditingController();
 
   @override
@@ -28,7 +30,24 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSummary();
+    _initAndLoad();
+  }
+
+  Future<void> _initAndLoad() async {
+    await _restoreLinkedSheet();
+    await _loadSummary();
+  }
+
+  Future<void> _saveSummaryToSupabase(Map<String, dynamic> summary) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    await Supabase.instance.client.from('inventorySheets').insert({
+      'user_id': user.id,
+      'sheet_id': _sheetId,
+      'sheet_tab': _sheetTab,
+      'summary': summary,
+      'created_at': DateTime.now().toIso8601String(),
+    });
   }
 
   Future<void> _loadSummary() async {
@@ -43,6 +62,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
         _summary = summary;
         _isLoading = false;
       });
+      await _saveSummaryToSupabase(summary);
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -59,7 +79,36 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
     _loadSummary();
   }
 
+  Future<void> addAndLinkSheet(String sheetId) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      await Supabase.instance.client.from('inventorySheets').insert({
+        'user_id': user.id,
+        'sheet_id': sheetId,
+        'sheet_tab': _sheetTab,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      setState(() {
+        _sheetId = sheetId;
+      });
+      await _loadSummary();
+    }
+  }
+
   Widget _buildSheetPicker() {
+    if (_sheetId != null && _sheetId!.isNotEmpty) {
+      // Show only a 'View Inventory Sheet' link, not the ID
+      return ListTile(
+        title: const Text('Inventory Sheet Connected'),
+        trailing: IconButton(
+          icon: const Icon(Icons.open_in_new),
+          onPressed: () {
+            final url = 'https://docs.google.com/spreadsheets/d/$_sheetId';
+            launchUrl(Uri.parse(url));
+          },
+        ),
+      );
+    }
     if (kIsWeb) {
       // Web: Google Picker button (placeholder for now)
       return ElevatedButton(
@@ -115,6 +164,15 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   Widget _buildSummaryCard(String title, Map<String, int> data) {
+    final uniqueEntries = <String, int>{};
+    data.forEach((key, value) {
+      final normalizedKey = key.trim().toLowerCase();
+      if (uniqueEntries.containsKey(normalizedKey)) {
+        uniqueEntries[normalizedKey] = uniqueEntries[normalizedKey]! + value;
+      } else {
+        uniqueEntries[normalizedKey] = value;
+      }
+    });
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
@@ -130,7 +188,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            ...data.entries.map((entry) => Padding(
+            ...uniqueEntries.entries.map((entry) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -147,6 +205,23 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _restoreLinkedSheet() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final sheets = await Supabase.instance.client
+        .from('inventorySheets')
+        .select()
+        .eq('user_id', user.id)
+        .order('created_at', ascending: false)
+        .limit(1);
+    if (sheets != null && sheets.isNotEmpty) {
+      setState(() {
+        _sheetId = sheets[0]['sheet_id'];
+        _sheetTab = sheets[0]['sheet_tab'] ?? 'Smartphone';
+      });
+    }
   }
 
   @override

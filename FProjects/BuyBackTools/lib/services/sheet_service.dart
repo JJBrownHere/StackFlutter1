@@ -5,7 +5,7 @@ import '../secrets.dart';
 
 class SheetService {
   static const String _spreadsheetId = '120gf3lHO7LOZDoD_F5GqLMSUKwBzjE5XhFDWwIVdoJs';
-  static const String _sheetName = 'Phones'; // Change as needed
+  static const String _sheetName = 'Smartphone'; // Changed from 'Phones' to match the actual tab name
   static const String _apiKey = googleSheetsApiKey;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [
@@ -50,15 +50,19 @@ class SheetService {
     final rows = await _fetchSheetRows(spreadsheetId, sheetName);
     if (rows.isEmpty) return [];
     final headers = rows[0];
-    final soldIndex = headers.indexOf('L');
-    final notesIndex = headers.indexOf('M');
+    print('DEBUG: Sheet headers: ' + headers.join(', '));
+    final hideIndex = headers.indexOf('hide');
+    final soldIndex = headers.indexOf('SoldStatus');
+    if (hideIndex == -1 || soldIndex == -1) {
+      throw Exception("Missing required header(s): 'hide' or 'SoldStatus'. Headers found: "+headers.join(", "));
+    }
     final availablePhones = <Map<String, String>>[];
     for (var i = 1; i < rows.length; i++) {
       final row = rows[i];
-      if (row.length <= soldIndex || row.length <= notesIndex) continue;
-      final isSold = row[soldIndex].toLowerCase() == 'true';
-      final hasNotes = row[notesIndex].isNotEmpty;
-      if (!isSold && !hasNotes) {
+      if (row.length <= soldIndex || row.length <= hideIndex) continue;
+      final isHidden = row[hideIndex].toLowerCase() == 'true';
+      final isSold = row[soldIndex].isNotEmpty;
+      if (!isHidden && !isSold) {
         final phoneData = <String, String>{};
         for (var j = 0; j < headers.length; j++) {
           if (j < row.length) {

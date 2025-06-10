@@ -32,7 +32,7 @@ class _AccountScreenState extends State<AccountScreen> {
           .eq('id', user.id)
           .maybeSingle();
       final sheets = await Supabase.instance.client
-          .from('sheets')
+          .from('leadsSheets')
           .select()
           .eq('user_id', user.id);
       setState(() {
@@ -51,7 +51,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final sheetId = DateTime.now().millisecondsSinceEpoch.toString(); // Placeholder
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      await Supabase.instance.client.from('sheets').insert({
+      await Supabase.instance.client.from('leadsSheets').insert({
         'user_id': user.id,
         'type': type,
         'sheet_id': sheetId,
@@ -67,23 +67,66 @@ class _AccountScreenState extends State<AccountScreen> {
       (s) => s['type'] == type,
       orElse: () => {},
     );
-    if (sheet.isEmpty) {
-      return ElevatedButton(
-        onPressed: () => _createSheet(type, label),
-        child: Text('Create $label'),
+    if (type == 'inventory') {
+      // Check if inventory sheet is linked in inventorySheets
+      final user = Supabase.instance.client.auth.currentUser;
+      return FutureBuilder<List<dynamic>>(
+        future: user == null
+            ? Future.value([])
+            : Supabase.instance.client
+                .from('inventorySheets')
+                .select()
+                .eq('user_id', user.id)
+                .order('created_at', ascending: false)
+                .limit(1),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const CircularProgressIndicator();
+          }
+          final inventorySheets = snapshot.data ?? [];
+          if (inventorySheets.isEmpty) {
+            // Not linked: button navigates to inventory page
+            return ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/inventory-summary');
+              },
+              child: const Text('Add Inventory Sheet'),
+            );
+          } else {
+            // Linked: show link out to Google Sheet
+            final sheetId = inventorySheets[0]['sheet_id'];
+            return ListTile(
+              title: const Text('Inventory Sheet: Connected'),
+              trailing: IconButton(
+                icon: const Icon(Icons.open_in_new),
+                onPressed: () {
+                  final url = 'https://docs.google.com/spreadsheets/d/$sheetId';
+                  launchUrl(Uri.parse(url));
+                },
+              ),
+            );
+          }
+        },
       );
     } else {
-      return ListTile(
-        title: Text('$label: Connected'),
-        subtitle: Text(sheet['sheet_name'] ?? ''),
-        trailing: IconButton(
-          icon: const Icon(Icons.open_in_new),
-          onPressed: () {
-            final url = 'https://docs.google.com/spreadsheets/d/${sheet['sheet_id']}';
-            launchUrl(Uri.parse(url));
-          },
-        ),
-      );
+      if (sheet.isEmpty) {
+        return ElevatedButton(
+          onPressed: () => _createSheet(type, label),
+          child: Text('Create $label'),
+        );
+      } else {
+        return ListTile(
+          title: Text('$label: Connected'),
+          subtitle: Text(sheet['sheet_name'] ?? sheet['sheet_id'] ?? ''),
+          trailing: IconButton(
+            icon: const Icon(Icons.open_in_new),
+            onPressed: () {
+              final url = 'https://docs.google.com/spreadsheets/d/${sheet['sheet_id']}';
+              launchUrl(Uri.parse(url));
+            },
+          ),
+        );
+      }
     }
   }
 
