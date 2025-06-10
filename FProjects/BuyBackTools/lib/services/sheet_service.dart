@@ -64,15 +64,19 @@ class SheetService {
       }
       final data = json.decode(response.body);
       print('Decoded API response: $data');
-      final values = data['values'] as List<dynamic>?;
-      if (values == null) return [];
-      print('Raw values array: $values');
-      return values
-          .where((row) => row is List)
+      final valuesRaw = data['values'];
+      if (valuesRaw == null || valuesRaw is! List) return [];
+      print('Raw values array: $valuesRaw');
+      final parsedRows = valuesRaw
+          .where((row) => row is List && row.isNotEmpty)
           .map((row) => (row as List)
-              .map((cell) => cell?.toString() ?? '')
+              .map((cell) => cell == null ? '' : cell.toString())
               .toList())
           .toList();
+      print('Parsed rows count: \\${parsedRows.length}');
+      if (parsedRows.isNotEmpty) print('First parsed row: \\${parsedRows[0]}');
+      if (parsedRows.isEmpty) throw Exception('No usable rows found in sheet/tab. Check if the tab is empty or the data is malformed.');
+      return parsedRows;
     } catch (e, stack) {
       print('Error in _fetchSheetRows: $e\n$stack');
       rethrow;
