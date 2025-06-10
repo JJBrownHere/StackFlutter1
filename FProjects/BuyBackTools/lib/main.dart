@@ -9,6 +9,7 @@ import 'screens/about_screen.dart';
 import 'screens/account_screen.dart';
 import 'screens/credits_screen.dart';
 import 'screens/gatekeeper_screen.dart';
+import 'screens/inventory_summary_screen.dart';
 
 globalRefreshSession(BuildContext context) {
   // Helper to refresh the app after login/logout
@@ -92,6 +93,7 @@ class MyAppState extends State<MyApp> {
             '/about': (context) => const AboutScreen(),
             '/account': (context) => const AccountScreen(),
             '/credits': (context) => const CreditsScreen(),
+            '/inventory-summary': (context) => const InventorySummaryScreen(),
           },
         );
       },
