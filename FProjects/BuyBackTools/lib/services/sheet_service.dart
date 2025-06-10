@@ -3,6 +3,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import '../secrets.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:html/parser.dart' as html_parser;
+import 'package:html/dom.dart';
 
 class SheetService {
   static const String _spreadsheetId = '120gf3lHO7LOZDoD_F5GqLMSUKwBzjE5XhFDWwIVdoJs';
@@ -18,6 +20,23 @@ class SheetService {
   );
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
+    if (kIsWeb) {
+      // Use published HTML for web
+      final publishedUrl = 'https://docs.google.com/spreadsheets/d/$spreadsheetId/pubhtml';
+      final response = await http.get(Uri.parse(publishedUrl));
+      if (response.statusCode != 200) throw Exception('Failed to fetch sheet HTML');
+      final document = html_parser.parse(response.body);
+      final table = document.querySelector('table');
+      if (table == null) throw Exception('No table found in sheet HTML');
+      final rows = <List<String>>[];
+      for (final row in table.querySelectorAll('tr')) {
+        final cells = row.querySelectorAll('td, th').map((cell) => cell.text.trim()).toList();
+        rows.add(cells);
+      }
+      print('Parsed HTML rows count: \\${rows.length}');
+      if (rows.isNotEmpty) print('First parsed HTML row: \\${rows[0]}');
+      return rows;
+    }
     try {
       String? accessToken;
       if (kIsWeb) {
