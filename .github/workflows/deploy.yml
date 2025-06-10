@@ -29,6 +29,13 @@ jobs:
         run: flutter pub get
         working-directory: FProjects/BuyBackTools
         
+      - name: Create secrets.dart
+        run: |
+          cat > FProjects/BuyBackTools/lib/secrets.dart <<EOF
+          const String googleSheetsApiKey = '${{ secrets.GOOGLE_SHEETS_API_KEY }}';
+          const String API_KEY = '${{ secrets.API_KEY }}';
+          EOF
+        
       - name: Build web
         run: flutter build web --release --web-renderer canvaskit --base-href /
         working-directory: FProjects/BuyBackTools

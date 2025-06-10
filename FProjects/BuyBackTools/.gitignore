@@ -76,3 +76,6 @@ app.*.map.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
 lib/secrets.dart
+
+# Secrets file
+FProjects/BuyBackTools/lib/secrets.dart
