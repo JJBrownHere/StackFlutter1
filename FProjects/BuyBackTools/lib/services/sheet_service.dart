@@ -66,7 +66,11 @@ class SheetService {
       print('Decoded API response: $data');
       final values = data['values'] as List<dynamic>?;
       if (values == null) return [];
-      return values.map((row) => List<String>.from(row.map((cell) => cell.toString()))).toList();
+      return values
+          .where((row) => row != null)
+          .map((row) => List<String>.from(
+              (row as List).map((cell) => cell?.toString() ?? '')))
+          .toList();
     } catch (e, stack) {
       print('Error in _fetchSheetRows: $e\n$stack');
       rethrow;
