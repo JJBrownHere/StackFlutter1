@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../main.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_screen.dart';
+import '../services/inventory_sheet_service.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -15,6 +16,7 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _isLoading = false;
   Map<String, dynamic>? _profile;
   List<Map<String, dynamic>> _sheets = [];
+  final _inventorySheetService = InventorySheetService();
 
   @override
   void initState() {
@@ -42,6 +44,46 @@ class _AccountScreenState extends State<AccountScreen> {
       });
     } else {
       setState(() { _isLoading = false; });
+    }
+  }
+
+  Future<void> _createInventorySheet() async {
+    setState(() { _isLoading = true; });
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('User not logged in or email not available');
+      }
+
+      final sheetId = await _inventorySheetService.createInventorySheet(user.email!);
+      
+      // Save to Supabase
+      await Supabase.instance.client.from('inventorySheets').insert({
+        'user_id': user.id,
+        'sheet_id': sheetId,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      await _loadProfileAndSheets();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Inventory sheet created successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating inventory sheet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
     }
   }
 
@@ -85,12 +127,12 @@ class _AccountScreenState extends State<AccountScreen> {
           }
           final inventorySheets = snapshot.data ?? [];
           if (inventorySheets.isEmpty) {
-            // Not linked: button navigates to inventory page
+            // Not linked: show create button
             return ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/inventory-summary');
-              },
-              child: const Text('Add Inventory Sheet'),
+              onPressed: _isLoading ? null : _createInventorySheet,
+              child: _isLoading 
+                ? const CircularProgressIndicator()
+                : const Text('Create Inventory Sheet'),
             );
           } else {
             // Linked: show link out to Google Sheet
