@@ -52,7 +52,13 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   Future<void> _loadSummary() async {
-    if (_sheetId == null) return;
+    if (_sheetId == null || _sheetId!.isEmpty) {
+      setState(() {
+        _error = 'No Google Sheet selected. Please pick a sheet to view inventory.';
+        _isLoading = false;
+      });
+      return;
+    }
     setState(() {
       _isLoading = true;
       _error = null;
