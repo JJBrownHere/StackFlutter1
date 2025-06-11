@@ -22,23 +22,24 @@ class SheetService {
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
-      // For web, use the direct sheet URL format with proper sheet ID
-      final sheetUrl = 'https://docs.google.com/spreadsheets/d/$spreadsheetId/export?format=csv&gid=$sheetName';
-      print('DEBUG: Using direct sheet URL: $sheetUrl');
-      
+      // Use Google Sheets API with API key for public sheets (CORS safe)
+      final apiKey = _apiKey; // Use the same key already provided
+      final url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName?key=$apiKey';
+      print('DEBUG: Using Google Sheets API URL: $url');
       try {
-        final response = await http.get(Uri.parse(sheetUrl));
+        final response = await http.get(Uri.parse(url));
         print('DEBUG: Response status code: ${response.statusCode}');
-        print('DEBUG: Response headers: ${response.headers}');
         if (response.statusCode != 200) {
           print('DEBUG: Error response body: ${response.body}');
           throw Exception('Failed to fetch sheet data: ${response.statusCode}');
         }
-        
-        // Parse CSV response
-        final rows = const CsvToListConverter().convert(response.body);
+        final data = json.decode(response.body);
+        print('DEBUG: Decoded API response: $data');
+        final values = data['values'] as List<dynamic>?;
+        if (values == null) return [];
+        final rows = values.map((row) => List<String>.from(row.map((cell) => cell.toString()))).toList();
         print('DEBUG: Successfully parsed ${rows.length} rows');
-        return rows.map((row) => row.map((cell) => cell.toString()).toList()).toList();
+        return rows;
       } catch (e, stack) {
         print('DEBUG: Error in web sheet fetch: $e');
         print('DEBUG: Stack trace: $stack');
