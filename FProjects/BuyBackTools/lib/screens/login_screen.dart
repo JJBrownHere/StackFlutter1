@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await Supabase.instance.client.auth.signInWithOAuth(
           OAuthProvider.google,
           redirectTo: 'https://itscrazyamazing.com/auth-callback',
-          scopes: 'email profile https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/drive.readonly',
+          scopes: 'email profile https://www.googleapis.com/auth/spreadsheets.readonly',
         );
         setState(() {
           _isLoading = false;
