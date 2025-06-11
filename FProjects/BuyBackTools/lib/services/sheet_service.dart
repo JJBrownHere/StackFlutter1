@@ -42,7 +42,7 @@ class SheetService {
       }
       print('DEBUG: googleSheetsApiKey at runtime: ' + _googleSheetsApiKey!);
       print('DEBUG: _apiKey at runtime: ' + _apiKey!);
-      final apiKey = _apiKey!;
+      final apiKey = _googleSheetsApiKey!;
       print('DEBUG: sheetId=$spreadsheetId, tabName=$sheetName, apiKey=$apiKey');
       if (spreadsheetId.isEmpty || sheetName.isEmpty || apiKey.isEmpty) {
         throw Exception('Missing required parameter for proxy: sheetId, tabName, or apiKey');
