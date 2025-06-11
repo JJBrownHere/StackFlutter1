@@ -22,26 +22,27 @@ class SheetService {
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
-      // Use Google Sheets API with API key for public sheets (CORS safe)
-      final apiKey = _apiKey; // Use the same key already provided
-      final url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName?key=$apiKey';
-      print('DEBUG: Using Google Sheets API URL: $url');
+      // Use the deployed GCP proxy endpoint for all web requests
+      final apiKey = _apiKey;
+      final proxyUrl = 'https://us-central1-stackflutter1.cloudfunctions.net/sheetsProxy'
+        '?sheetId=$spreadsheetId&tabName=${Uri.encodeComponent(sheetName)}&apiKey=$apiKey';
+      print('DEBUG: Using proxy URL: $proxyUrl');
       try {
-        final response = await http.get(Uri.parse(url));
-        print('DEBUG: Response status code: ${response.statusCode}');
+        final response = await http.get(Uri.parse(proxyUrl));
+        print('DEBUG: Proxy response status code: ${response.statusCode}');
         if (response.statusCode != 200) {
           print('DEBUG: Error response body: ${response.body}');
-          throw Exception('Failed to fetch sheet data: ${response.statusCode}');
+          throw Exception('Failed to fetch sheet data from proxy: ${response.statusCode}');
         }
         final data = json.decode(response.body);
-        print('DEBUG: Decoded API response: $data');
+        print('DEBUG: Decoded proxy response: $data');
         final values = data['values'] as List<dynamic>?;
         if (values == null) return [];
         final rows = values.map((row) => List<String>.from(row.map((cell) => cell.toString()))).toList();
         print('DEBUG: Successfully parsed ${rows.length} rows');
         return rows;
       } catch (e, stack) {
-        print('DEBUG: Error in web sheet fetch: $e');
+        print('DEBUG: Error in proxy sheet fetch: $e');
         print('DEBUG: Stack trace: $stack');
         rethrow;
       }
