@@ -294,13 +294,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator()),
                 if (_error != null)
-                  Center(
-                    child: Text(
-                      'Error loading data: $_error',
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  SizedBox.shrink(),
                 if (_summary != null)
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.6,
@@ -337,6 +331,8 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
                         _buildSummaryCard('By Storage', _summary!['byStorage']),
                         _buildSummaryCard('By Color', _summary!['byColor']),
                         _buildSummaryCard('By Condition', _summary!['byCondition']),
+                        const SizedBox(height: 16),
+                        _buildAvailablePhonesSection(),
                       ],
                     ),
                   ),
@@ -345,6 +341,81 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAvailablePhonesSection() {
+    return FutureBuilder<List<Map<String, String>>>(
+      future: _sheetId != null && _sheetId!.isNotEmpty
+          ? _sheetService.getAvailablePhones(_sheetId!, _sheetTab)
+          : Future.value([]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final phones = snapshot.data ?? [];
+        if (phones.isEmpty) {
+          return const Center(child: Text('No available phones.'));
+        }
+        // Custom order for iPhones (newest to oldest)
+        final customOrder = [
+          'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
+          'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
+          'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
+          'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13 Mini', 'iPhone 13',
+          'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12 Mini', 'iPhone 12',
+          'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
+          'iPhone XS Max', 'iPhone XS', 'iPhone XR',
+          'iPhone X',
+          'iPhone 8 Plus', 'iPhone 8',
+          'iPhone 7 Plus', 'iPhone 7',
+          'iPhone 6s Plus', 'iPhone 6s',
+          'iPhone 6 Plus', 'iPhone 6',
+          'iPhone SE3', 'iPhone SE2', 'iPhone SE',
+        ];
+        String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+        phones.sort((a, b) {
+          final aModel = a['Model'] ?? '';
+          final bModel = b['Model'] ?? '';
+          final aNorm = normalize(aModel);
+          final bNorm = normalize(bModel);
+          final aIndex = customOrder.map((e) => e.toLowerCase()).toList().indexOf(aNorm);
+          final bIndex = customOrder.map((e) => e.toLowerCase()).toList().indexOf(bNorm);
+          if (aIndex == -1 && bIndex == -1) {
+            return bModel.compareTo(aModel); // fallback: alpha, newest first
+          } else if (aIndex == -1) {
+            return 1;
+          } else if (bIndex == -1) {
+            return -1;
+          } else {
+            return aIndex.compareTo(bIndex);
+          }
+        });
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Available Phones',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ...phones.map((phone) {
+              final model = phone['Model'] ?? '';
+              final formattedModel = model.isNotEmpty
+                  ? model[0].toUpperCase() + model.substring(1)
+                  : '';
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                child: ListTile(
+                  title: Text(formattedModel),
+                  subtitle: Text('${phone['Storage'] ?? ''} | ${phone['Condition'] ?? ''}'),
+                  trailing: Text('${phone['Price'] ?? ''}'),
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      },
     );
   }
 } 

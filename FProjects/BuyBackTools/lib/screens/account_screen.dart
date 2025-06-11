@@ -4,6 +4,8 @@ import '../main.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_screen.dart';
 import '../services/inventory_sheet_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -17,6 +19,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Map<String, dynamic>? _profile;
   List<Map<String, dynamic>> _sheets = [];
   final _inventorySheetService = InventorySheetService();
+  TextEditingController _sheetUrlController = TextEditingController();
 
   @override
   void initState() {
@@ -102,10 +105,22 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _createSheet(String type, String sheetName) async {
     setState(() { _isLoading = true; });
-    // TODO: Replace with your Google Sheets creation logic
-    final sheetId = DateTime.now().millisecondsSinceEpoch.toString(); // Placeholder
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('User not logged in or email not available');
+      }
+      // Call the backend Cloud Function for lead sheet creation
+      final response = await http.post(
+        Uri.parse('https://us-central1-stackflutter1.cloudfunctions.net/createSheet'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'sheetType': type, 'userEmail': user.email}),
+      );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create sheet: ${response.body}');
+      }
+      final data = json.decode(response.body);
+      final sheetId = data['sheetId'] ?? data['sheetUrl'] ?? '';
       await Supabase.instance.client.from('leadsSheets').insert({
         'user_id': user.id,
         'type': type,
@@ -113,8 +128,96 @@ class _AccountScreenState extends State<AccountScreen> {
         'sheet_name': sheetName,
       });
       await _loadProfileAndSheets();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Lead sheet created and shared!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating lead sheet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
     }
-    setState(() { _isLoading = false; });
+  }
+
+  Future<void> _connectCustomInventorySheet() async {
+    setState(() { _isLoading = true; });
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('User not logged in or email not available');
+      }
+      final url = _sheetUrlController.text.trim();
+      final reg = RegExp(r'/d/([a-zA-Z0-9-_]+)');
+      final match = reg.firstMatch(url);
+      String? sheetId;
+      if (match != null) {
+        sheetId = match.group(1);
+      } else if (url.length > 20 && !url.contains('/')) {
+        sheetId = url;
+      }
+      if (sheetId == null) throw Exception('Invalid Google Sheet URL or ID');
+
+      // Ensure profile exists
+      final profile = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+      if (profile == null) {
+        await Supabase.instance.client.from('profiles').insert({
+          'id': user.id,
+          'email': user.email,
+        });
+      }
+
+      // Upsert inventorySheets (replace if exists)
+      final existing = await Supabase.instance.client
+          .from('inventorySheets')
+          .select()
+          .eq('user_id', user.id)
+          .maybeSingle();
+      if (existing != null) {
+        await Supabase.instance.client.from('inventorySheets').update({
+          'sheet_id': sheetId,
+          'created_at': DateTime.now().toIso8601String(),
+        }).eq('user_id', user.id);
+      } else {
+        await Supabase.instance.client.from('inventorySheets').insert({
+          'user_id': user.id,
+          'sheet_id': sheetId,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }
+      await _loadProfileAndSheets();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Inventory sheet connected successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error connecting inventory sheet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
+    }
   }
 
   Widget _buildSheetSection(String type, String label) {
@@ -145,7 +248,7 @@ class _AccountScreenState extends State<AccountScreen> {
               onPressed: _isLoading ? null : _createInventorySheet,
               child: _isLoading 
                 ? const CircularProgressIndicator()
-                : const Text('Create Inventory Sheet'),
+                : const Text('Create STACKS Inventory Sheet'),
             );
           } else {
             // Linked: show link out to Google Sheet
@@ -183,6 +286,35 @@ class _AccountScreenState extends State<AccountScreen> {
         );
       }
     }
+  }
+
+  Widget _buildCustomSheetOption() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        const Text(
+          'Use your current ECOM STACKS Feed',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _sheetUrlController,
+                decoration: const InputDecoration(
+                  hintText: 'Paste Google Sheet URL or ID',
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _connectCustomInventorySheet,
+              child: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Connect'),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   @override
@@ -248,6 +380,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   children: [
                     _buildSheetSection('lead', 'STACKS Lead Sheet'),
                     _buildSheetSection('inventory', 'STACKS Inventory Sheet'),
+                    _buildCustomSheetOption(),
                   ],
                 ),
               ),
