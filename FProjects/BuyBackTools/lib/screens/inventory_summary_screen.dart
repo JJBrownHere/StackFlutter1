@@ -284,7 +284,12 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSheetPicker(),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/account');
+                  },
+                  child: const Text('Visit Your Account Page'),
+                ),
                 const SizedBox(height: 16),
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator()),
@@ -296,7 +301,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                if (!_isLoading && _summary != null)
+                if (_summary != null)
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.6,
                     child: ListView(
