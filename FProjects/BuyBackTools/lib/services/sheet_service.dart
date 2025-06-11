@@ -40,6 +40,19 @@ class SheetService {
     if (kIsWeb) {
       final session = Supabase.instance.client.auth.currentSession;
       final accessToken = session?.providerToken;
+      print('DEBUG: Google OAuth access token: $accessToken');
+      if (accessToken != null) {
+        // JWTs are three parts: header.payload.signature
+        final parts = accessToken.split('.');
+        if (parts.length == 3) {
+          try {
+            final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+            print('DEBUG: Decoded access token payload: $payload');
+          } catch (e) {
+            print('DEBUG: Failed to decode access token payload: $e');
+          }
+        }
+      }
       String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
       final headers = <String, String>{};
       if (accessToken != null) {
