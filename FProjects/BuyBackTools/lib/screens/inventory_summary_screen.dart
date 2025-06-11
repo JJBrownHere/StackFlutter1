@@ -53,15 +53,13 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
 
   Future<void> _loadSummary() async {
     if (_sheetId == null) return;
-    
     setState(() {
       _isLoading = true;
       _error = null;
     });
-    
     try {
-      print('DEBUG: Loading summary for sheet ID: $_sheetId, gid: $_sheetGid');
-      final summary = await _sheetService.getPhoneSummary(_sheetId!, _sheetGid ?? '0');
+      print('DEBUG: Loading summary for sheet ID: $_sheetId, tab: $_sheetTab');
+      final summary = await _sheetService.getPhoneSummary(_sheetId!, _sheetTab);
       setState(() {
         _summary = summary;
         _isLoading = false;
@@ -176,32 +174,19 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
 
   String? _extractSheetId(String input) {
     print('DEBUG: Extracting sheet ID from input: $input');
-    
     // Try to match regular Google Sheets URL format
     final reg = RegExp(r'/d/([a-zA-Z0-9-_]+)');
     final match = reg.firstMatch(input);
     if (match != null) {
       final id = match.group(1);
       print('DEBUG: Found sheet ID: $id');
-      
-      // Try to extract gid parameter
-      final gidMatch = RegExp(r'[?&]gid=(\d+)').firstMatch(input);
-      if (gidMatch != null) {
-        final gid = gidMatch.group(1);
-        print('DEBUG: Found sheet gid: $gid');
-        // Store the gid for later use
-        _sheetGid = gid;
-      }
-      
       return id;
     }
-    
     // If it's just a long string without slashes, assume it's an ID
     if (input.length > 20 && !input.contains('/')) {
       print('DEBUG: Using input as direct sheet ID');
       return input;
     }
-    
     print('DEBUG: No valid sheet ID found in input');
     return null;
   }
