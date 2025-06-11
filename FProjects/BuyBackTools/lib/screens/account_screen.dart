@@ -55,9 +55,22 @@ class _AccountScreenState extends State<AccountScreen> {
         throw Exception('User not logged in or email not available');
       }
 
+      // Ensure profile exists
+      final profile = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+      if (profile == null) {
+        await Supabase.instance.client.from('profiles').insert({
+          'id': user.id,
+          'email': user.email,
+          // Add other required fields with defaults if needed
+        });
+      }
+
       final sheetId = await _inventorySheetService.createInventorySheet(user.email!);
       
-      // Save to Supabase
       await Supabase.instance.client.from('inventorySheets').insert({
         'user_id': user.id,
         'sheet_id': sheetId,
