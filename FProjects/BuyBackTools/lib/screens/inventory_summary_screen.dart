@@ -23,6 +23,9 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   String? _sheetGid;
   String _phoneSearch = '';
   bool _phonesExpanded = false;
+  List<Map<String, String>> _availablePhones = [];
+  bool _loadingPhones = false;
+  String? _lastSheetId;
 
   @override
   void dispose() {
@@ -45,6 +48,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
     }
     await _restoreLinkedSheet();
     await _loadSummary();
+    await _loadAvailablePhones();
   }
 
   Future<void> _saveSummaryToSupabase(Map<String, dynamic> summary) async {
@@ -215,6 +219,21 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
         uniqueEntries[normalizedKey] = value;
       }
     });
+    List<MapEntry<String, int>> entries = uniqueEntries.entries.toList();
+    if (title.toLowerCase().contains('storage')) {
+      // Sort storage: TB > GB, numerically descending
+      int storageValue(String s) {
+        final match = RegExp(r'(\d+)(TB|GB)').firstMatch(s.toUpperCase());
+        if (match == null) return 0;
+        int num = int.tryParse(match.group(1) ?? '0') ?? 0;
+        String unit = match.group(2) ?? 'GB';
+        return unit == 'TB' ? num * 1024 : num;
+      }
+      entries.sort((a, b) => storageValue(b.key).compareTo(storageValue(a.key)));
+    } else if (title.toLowerCase().contains('color')) {
+      // Sort colors alphabetically
+      entries.sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
+    }
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
@@ -223,7 +242,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         initiallyExpanded: false,
-        children: uniqueEntries.entries.map((entry) => Padding(
+        children: entries.map((entry) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -253,6 +272,33 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
       setState(() {
         _sheetId = _extractSheetId(sheets[0]['sheet_id'] ?? '');
         _sheetTab = sheets[0]['sheet_tab'] ?? 'Smartphone';
+      });
+    }
+  }
+
+  Future<void> _loadAvailablePhones() async {
+    if (_sheetId == null || _sheetId!.isEmpty) {
+      setState(() {
+        _availablePhones = [];
+        _loadingPhones = false;
+        _lastSheetId = null;
+      });
+      return;
+    }
+    if (_sheetId == _lastSheetId) return; // Don't reload if same sheet
+    setState(() { _loadingPhones = true; });
+    try {
+      final phones = await _sheetService.getAvailablePhones(_sheetId!, _sheetTab);
+      setState(() {
+        _availablePhones = phones;
+        _loadingPhones = false;
+        _lastSheetId = _sheetId;
+      });
+    } catch (e) {
+      setState(() {
+        _availablePhones = [];
+        _loadingPhones = false;
+        _lastSheetId = _sheetId;
       });
     }
   }
@@ -338,112 +384,109 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   Widget _buildAvailablePhonesSection() {
-    return FutureBuilder<List<Map<String, String>>>(
-      future: _sheetId != null && _sheetId!.isNotEmpty
-          ? _sheetService.getAvailablePhones(_sheetId!, _sheetTab)
-          : Future.value([]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final phones = snapshot.data ?? [];
-        if (phones.isEmpty) {
-          return const Center(child: Text('No available phones.'));
-        }
-        // Custom order for iPhones (newest to oldest)
-        final customOrder = [
-          'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
-          'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
-          'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
-          'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13 Mini', 'iPhone 13',
-          'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12 Mini', 'iPhone 12',
-          'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
-          'iPhone XS Max', 'iPhone XS', 'iPhone XR',
-          'iPhone X',
-          'iPhone 8 Plus', 'iPhone 8',
-          'iPhone 7 Plus', 'iPhone 7',
-          'iPhone 6s Plus', 'iPhone 6s',
-          'iPhone 6 Plus', 'iPhone 6',
-          'iPhone SE3', 'iPhone SE2', 'iPhone SE',
-        ];
-        String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
-        phones.sort((a, b) {
-          final aModel = a['Model'] ?? '';
-          final bModel = b['Model'] ?? '';
-          final aNorm = normalize(aModel);
-          final bNorm = normalize(bModel);
-          final aIndex = customOrder.map((e) => e.toLowerCase()).toList().indexOf(aNorm);
-          final bIndex = customOrder.map((e) => e.toLowerCase()).toList().indexOf(bNorm);
-          if (aIndex == -1 && bIndex == -1) {
-            return bModel.compareTo(aModel); // fallback: alpha, newest first
-          } else if (aIndex == -1) {
-            return 1;
-          } else if (bIndex == -1) {
-            return -1;
-          } else {
-            return aIndex.compareTo(bIndex);
-          }
-        });
-        // Filter phones by search
-        final filteredPhones = _phoneSearch.isEmpty
-            ? phones
-            : phones.where((phone) {
-                final model = (phone['Model'] ?? '').toLowerCase();
-                final storage = (phone['Storage'] ?? '').toLowerCase();
-                final condition = (phone['Condition'] ?? '').toLowerCase();
-                final search = _phoneSearch.toLowerCase();
-                return model.contains(search) || storage.contains(search) || condition.contains(search);
-              }).toList();
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: ExpansionTile(
-            title: const Text(
-              'Available Phones',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    // Custom order for iPhones (newest to oldest)
+    final customOrder = [
+      'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
+      'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
+      'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
+      'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13 Mini', 'iPhone 13',
+      'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12 Mini', 'iPhone 12',
+      'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
+      'iPhone XS Max', 'iPhone XS', 'iPhone XR',
+      'iPhone X',
+      'iPhone 8 Plus', 'iPhone 8',
+      'iPhone 7 Plus', 'iPhone 7',
+      'iPhone 6s Plus', 'iPhone 6s',
+      'iPhone 6 Plus', 'iPhone 6',
+      'iPhone SE3', 'iPhone SE2', 'iPhone SE',
+    ];
+    String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+    final phones = List<Map<String, String>>.from(_availablePhones);
+    phones.sort((a, b) {
+      final aModel = a['Model'] ?? '';
+      final bModel = b['Model'] ?? '';
+      final aNorm = normalize(aModel);
+      final bNorm = normalize(bModel);
+      final aIndex = customOrder.map((e) => e.toLowerCase()).toList().indexOf(aNorm);
+      final bIndex = customOrder.map((e) => e.toLowerCase()).toList().indexOf(bNorm);
+      if (aIndex == -1 && bIndex == -1) {
+        return bModel.compareTo(aModel); // fallback: alpha, newest first
+      } else if (aIndex == -1) {
+        return 1;
+      } else if (bIndex == -1) {
+        return -1;
+      } else {
+        return aIndex.compareTo(bIndex);
+      }
+    });
+    final filteredPhones = _phoneSearch.isEmpty
+        ? phones
+        : phones.where((phone) {
+            final model = (phone['Model'] ?? '').toLowerCase();
+            final storage = (phone['Storage'] ?? '').toLowerCase();
+            final condition = (phone['Condition'] ?? '').toLowerCase();
+            final search = _phoneSearch.toLowerCase();
+            return model.contains(search) || storage.contains(search) || condition.contains(search);
+          }).toList();
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ExpansionTile(
+        title: const Text(
+          'Available Phones',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        initiallyExpanded: _phonesExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() {
+            _phonesExpanded = expanded;
+            if (!expanded) _phoneSearch = '';
+          });
+        },
+        children: [
+          if (_phonesExpanded)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: 'Search by model, storage, or condition',
+                  prefixIcon: Icon(Icons.search),
+                ),
+                onChanged: (val) {
+                  setState(() {
+                    _phoneSearch = val;
+                  });
+                },
+              ),
             ),
-            initiallyExpanded: _phonesExpanded,
-            onExpansionChanged: (expanded) {
-              setState(() {
-                _phonesExpanded = expanded;
-                if (!expanded) _phoneSearch = '';
-              });
-            },
-            children: [
-              if (_phonesExpanded)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search by model, storage, or condition',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        _phoneSearch = val;
-                      });
-                    },
-                  ),
-                ),
-              if (filteredPhones.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No phones match your search.'),
-                ),
-              ...filteredPhones.map((phone) {
-                final model = phone['Model'] ?? '';
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  child: ListTile(
-                    title: Text(model),
-                    subtitle: Text('${phone['Storage'] ?? ''} | ${phone['Condition'] ?? ''}'),
-                    trailing: Text('${phone['Price'] ?? ''}'),
-                  ),
-                );
-              }).toList(),
-            ],
-          ),
-        );
-      },
+          if (_loadingPhones)
+            const Center(child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            )),
+          if (!_loadingPhones && filteredPhones.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('No phones match your search.'),
+            ),
+          ...filteredPhones.map((phone) {
+            final model = phone['Model'] ?? '';
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              child: ListTile(
+                title: Text(model),
+                subtitle: Text('${phone['Storage'] ?? ''} | ${phone['Condition'] ?? ''}'),
+                trailing: Text('${phone['Price'] ?? ''}'),
+              ),
+            );
+          }).toList(),
+        ],
+      ),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant InventorySummaryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadAvailablePhones();
   }
 } 

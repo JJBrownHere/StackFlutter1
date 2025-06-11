@@ -241,6 +241,12 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
       {'id': 'dGrade', 'label': 'D Grade'},
     ];
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardColor;
+    final tableHeaderColor = isDark ? Colors.grey[900] : Colors.blueGrey.shade50;
+    final tableRowColor = isDark ? Colors.grey[850] : Colors.white;
+    final tableAltRowColor = isDark ? Colors.grey[800] : Colors.grey.shade100;
     // Find max per grade
     Map<String, double> maxPerGrade = {};
     for (var g in grades) {
@@ -255,6 +261,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
       // Table layout for wide screens
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
+        color: cardColor,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -263,7 +270,13 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
               const Text('GRADED PRICING', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 8),
               DataTable(
-                headingRowColor: MaterialStateProperty.all(Colors.blueGrey.shade50),
+                headingRowColor: MaterialStateProperty.all(tableHeaderColor),
+                dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return theme.colorScheme.primary.withOpacity(0.08);
+                  }
+                  return null;
+                }),
                 columns: [
                   const DataColumn(label: Text('Company', style: TextStyle(fontWeight: FontWeight.bold))),
                   ...grades.map((g) => DataColumn(label: Text(g['label']!, style: const TextStyle(fontWeight: FontWeight.bold))))
@@ -272,7 +285,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
                   final company = companies[index];
                   final prices = buybackPricing[company];
                   return DataRow(
-                    color: MaterialStateProperty.all(index % 2 == 0 ? Colors.white : Colors.grey.shade100),
+                    color: MaterialStateProperty.all(index % 2 == 0 ? tableRowColor : tableAltRowColor),
                     cells: [
                       DataCell(Text(company)),
                       ...grades.map((g) {
@@ -313,6 +326,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
                   width: (MediaQuery.of(context).size.width - 40) / 2, // 2 cards per row with some margin
                   child: Card(
                     margin: EdgeInsets.zero,
+                    color: cardColor,
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Column(
@@ -356,6 +370,12 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
       {'id': 'verizon', 'label': 'Verizon'},
     ];
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardColor;
+    final tableHeaderColor = isDark ? Colors.grey[900] : Colors.blueGrey.shade50;
+    final tableRowColor = isDark ? Colors.grey[850] : Colors.white;
+    final tableAltRowColor = isDark ? Colors.grey[800] : Colors.grey.shade100;
     // Find max value
     double maxValue = 0;
     for (var c in companies) {
@@ -366,6 +386,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
       // Table layout for wide screens
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
+        color: cardColor,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -374,11 +395,17 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
               const Text('TRADEIN PRICING (Up To)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 8),
               DataTable(
-                headingRowColor: MaterialStateProperty.all(Colors.blueGrey.shade50),
+                headingRowColor: MaterialStateProperty.all(tableHeaderColor),
+                dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return theme.colorScheme.primary.withOpacity(0.08);
+                  }
+                  return null;
+                }),
                 columns: companies.map((c) => DataColumn(label: Text(c['label']!, style: const TextStyle(fontWeight: FontWeight.bold)))).toList(),
                 rows: [
                   DataRow(
-                    color: MaterialStateProperty.all(Colors.white),
+                    color: MaterialStateProperty.all(tableRowColor),
                     cells: companies.map((c) {
                       final value = tradeinPricing[c['id']] != null ? tradeinPricing[c['id']]['upTo'] : null;
                       final isMax = value != null && value.toDouble() == maxValue;
@@ -412,6 +439,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
             final isMax = value != null && value.toDouble() == maxValue;
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 4),
+              color: cardColor,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Row(
@@ -450,6 +478,12 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
       {'id': 'ecofriendly', 'label': 'Ecofriendly'},
     ];
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = theme.cardColor;
+    final tableHeaderColor = isDark ? Colors.grey[900] : Colors.blueGrey.shade50;
+    final tableRowColor = isDark ? Colors.grey[850] : Colors.white;
+    final tableAltRowColor = isDark ? Colors.grey[800] : Colors.grey.shade100;
     // Find max per condition
     Map<String, double> maxPerCond = {};
     for (var c in conditions) {
@@ -464,6 +498,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
       // Table layout for wide screens
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
+        color: cardColor,
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -472,7 +507,13 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
               const Text('SELLER PRICING', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 8),
               DataTable(
-                headingRowColor: MaterialStateProperty.all(Colors.blueGrey.shade50),
+                headingRowColor: MaterialStateProperty.all(tableHeaderColor),
+                dataRowColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return theme.colorScheme.primary.withOpacity(0.08);
+                  }
+                  return null;
+                }),
                 columns: [
                   const DataColumn(label: Text('Vendor', style: TextStyle(fontWeight: FontWeight.bold))),
                   ...conditions.map((c) => DataColumn(label: Text(c['label']!, style: const TextStyle(fontWeight: FontWeight.bold))))
@@ -481,7 +522,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
                   final vendor = vendors[index];
                   final prices = salePricing[vendor['id']] ?? {};
                   return DataRow(
-                    color: MaterialStateProperty.all(index % 2 == 0 ? Colors.white : Colors.grey.shade100),
+                    color: MaterialStateProperty.all(index % 2 == 0 ? tableRowColor : tableAltRowColor),
                     cells: [
                       DataCell(Text(vendor['label']!)),
                       ...conditions.map((c) {
@@ -517,6 +558,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
             final prices = salePricing[vendor['id']] ?? {};
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 4),
+              color: cardColor,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Column(
