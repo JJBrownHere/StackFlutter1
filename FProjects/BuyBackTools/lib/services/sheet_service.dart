@@ -24,6 +24,10 @@ class SheetService {
     if (kIsWeb) {
       // Use the deployed GCP proxy endpoint for all web requests
       final apiKey = _apiKey;
+      print('DEBUG: sheetId=$spreadsheetId, tabName=$sheetName, apiKey=$apiKey');
+      if (spreadsheetId.isEmpty || sheetName.isEmpty || apiKey.isEmpty) {
+        throw Exception('Missing required parameter for proxy: sheetId, tabName, or apiKey');
+      }
       final proxyUrl = 'https://us-central1-stackflutter1.cloudfunctions.net/sheetsProxy'
         '?sheetId=$spreadsheetId&tabName=${Uri.encodeComponent(sheetName)}&apiKey=$apiKey';
       print('DEBUG: Using proxy URL: $proxyUrl');
