@@ -6,11 +6,14 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart';
 import 'package:csv/csv.dart';
+import 'dart:html' as html; // Only for web
 
 class SheetService {
   static const String _spreadsheetId = '120gf3lHO7LOZDoD_F5GqLMSUKwBzjE5XhFDWwIVdoJs';
   static const String _sheetName = 'Smartphone'; // Changed from 'Phones' to match the actual tab name
-  static final String _apiKey = googleSheetsApiKey;
+  static String? _apiKey;
+  static String? _googleSheetsApiKey;
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [
       'email',
@@ -20,15 +23,26 @@ class SheetService {
     ],
   );
 
+  static Future<void> loadApiKeys() async {
+    if (kIsWeb) {
+      final response = await html.HttpRequest.getString('api_key.json');
+      final data = json.decode(response) as Map<String, dynamic>;
+      _googleSheetsApiKey = data['googleSheetsApiKey'];
+      _apiKey = data['API_KEY'];
+    } else {
+      _googleSheetsApiKey = googleSheetsApiKey;
+      _apiKey = API_KEY;
+    }
+  }
+
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
-      // Debug: Print key values at runtime
-      print('DEBUG: googleSheetsApiKey at runtime: '
-          '[31m' + googleSheetsApiKey + '\u001b[0m');
-      print('DEBUG: _apiKey at runtime: '
-          '[31m' + _apiKey + '\u001b[0m');
-      // Use the deployed GCP proxy endpoint for all web requests
-      final apiKey = _apiKey;
+      if (_apiKey == null || _googleSheetsApiKey == null) {
+        throw Exception('API keys not loaded. Call SheetService.loadApiKeys() first.');
+      }
+      print('DEBUG: googleSheetsApiKey at runtime: ' + _googleSheetsApiKey!);
+      print('DEBUG: _apiKey at runtime: ' + _apiKey!);
+      final apiKey = _apiKey!;
       print('DEBUG: sheetId=$spreadsheetId, tabName=$sheetName, apiKey=$apiKey');
       if (spreadsheetId.isEmpty || sheetName.isEmpty || apiKey.isEmpty) {
         throw Exception('Missing required parameter for proxy: sheetId, tabName, or apiKey');
@@ -56,7 +70,9 @@ class SheetService {
         rethrow;
       }
     } else {
-      // Mobile path - keep existing code unchanged
+      // Mobile path - keep existing code unchanged, but use loaded keys
+      final apiKey = _apiKey ?? API_KEY;
+      final googleKey = _googleSheetsApiKey ?? googleSheetsApiKey;
       try {
         String? accessToken;
         try {
@@ -77,7 +93,7 @@ class SheetService {
         if (accessToken != null) {
           headers['Authorization'] = 'Bearer $accessToken';
         } else {
-          url += '?key=$_apiKey';
+          url += '?key=$googleKey';
         }
         print('Google Sheets API call: url=$url, accessToken=${accessToken != null}');
         final response = await http.get(Uri.parse(url), headers: headers);

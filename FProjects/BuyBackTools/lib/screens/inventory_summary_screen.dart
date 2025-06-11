@@ -35,6 +35,12 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   }
 
   Future<void> _initAndLoad() async {
+    if (kIsWeb) {
+      await SheetService.loadApiKeys();
+    } else {
+      // For mobile, load synchronously
+      SheetService.loadApiKeys();
+    }
     await _restoreLinkedSheet();
     await _loadSummary();
   }
