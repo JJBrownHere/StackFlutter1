@@ -254,7 +254,7 @@ class _AccountScreenState extends State<AccountScreen> {
             // Linked: show link out to Google Sheet
             final sheetId = inventorySheets[0]['sheet_id'];
             return ListTile(
-              title: const Text('Inventory Sheet: Connected'),
+              title: const Text('STACKS Inventory Sheet: Connected'),
               trailing: IconButton(
                 icon: const Icon(Icons.open_in_new),
                 onPressed: () {
@@ -288,7 +288,8 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Widget _buildCustomSheetOption() {
+  Widget _buildCustomSheetOption(bool show) {
+    if (!show) return SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -380,7 +381,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   children: [
                     _buildSheetSection('lead', 'STACKS Lead Sheet'),
                     _buildSheetSection('inventory', 'STACKS Inventory Sheet'),
-                    _buildCustomSheetOption(),
+                    _buildCustomSheetOption(true),
                   ],
                 ),
               ),

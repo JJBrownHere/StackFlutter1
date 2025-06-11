@@ -21,6 +21,8 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   String _sheetTab = 'Smartphone';
   final _sheetController = TextEditingController();
   String? _sheetGid;
+  String _phoneSearch = '';
+  bool _phonesExpanded = false;
 
   @override
   void dispose() {
@@ -206,7 +208,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
   Widget _buildSummaryCard(String title, Map<String, int> data) {
     final uniqueEntries = <String, int>{};
     data.forEach((key, value) {
-      final normalizedKey = key.trim().toLowerCase();
+      final normalizedKey = key.trim();
       if (uniqueEntries.containsKey(normalizedKey)) {
         uniqueEntries[normalizedKey] = uniqueEntries[normalizedKey]! + value;
       } else {
@@ -215,34 +217,25 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
     });
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...uniqueEntries.entries.map((entry) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(entry.key),
-                  Text(
-                    entry.value.toString(),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            )),
-          ],
+      child: ExpansionTile(
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
+        initiallyExpanded: false,
+        children: uniqueEntries.entries.map((entry) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(entry.key),
+              Text(
+                entry.value.toString(),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        )).toList(),
       ),
     );
   }
@@ -297,7 +290,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
                   SizedBox.shrink(),
                 if (_summary != null)
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.6,
+                    height: MediaQuery.of(context).size.height * 0.85,
                     child: ListView(
                       shrinkWrap: true,
                       children: [
@@ -391,29 +384,64 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
             return aIndex.compareTo(bIndex);
           }
         });
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
+        // Filter phones by search
+        final filteredPhones = _phoneSearch.isEmpty
+            ? phones
+            : phones.where((phone) {
+                final model = (phone['Model'] ?? '').toLowerCase();
+                final storage = (phone['Storage'] ?? '').toLowerCase();
+                final condition = (phone['Condition'] ?? '').toLowerCase();
+                final search = _phoneSearch.toLowerCase();
+                return model.contains(search) || storage.contains(search) || condition.contains(search);
+              }).toList();
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ExpansionTile(
+            title: const Text(
               'Available Phones',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            ...phones.map((phone) {
-              final model = phone['Model'] ?? '';
-              final formattedModel = model.isNotEmpty
-                  ? model[0].toUpperCase() + model.substring(1)
-                  : '';
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                child: ListTile(
-                  title: Text(formattedModel),
-                  subtitle: Text('${phone['Storage'] ?? ''} | ${phone['Condition'] ?? ''}'),
-                  trailing: Text('${phone['Price'] ?? ''}'),
+            initiallyExpanded: _phonesExpanded,
+            onExpansionChanged: (expanded) {
+              setState(() {
+                _phonesExpanded = expanded;
+                if (!expanded) _phoneSearch = '';
+              });
+            },
+            children: [
+              if (_phonesExpanded)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: 'Search by model, storage, or condition',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (val) {
+                      setState(() {
+                        _phoneSearch = val;
+                      });
+                    },
+                  ),
                 ),
-              );
-            }).toList(),
-          ],
+              if (filteredPhones.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('No phones match your search.'),
+                ),
+              ...filteredPhones.map((phone) {
+                final model = phone['Model'] ?? '';
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  child: ListTile(
+                    title: Text(model),
+                    subtitle: Text('${phone['Storage'] ?? ''} | ${phone['Condition'] ?? ''}'),
+                    trailing: Text('${phone['Price'] ?? ''}'),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
         );
       },
     );
