@@ -22,6 +22,11 @@ class SheetService {
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
+      // Debug: Print key values at runtime
+      print('DEBUG: googleSheetsApiKey at runtime: '
+          '[31m' + googleSheetsApiKey + '\u001b[0m');
+      print('DEBUG: _apiKey at runtime: '
+          '[31m' + _apiKey + '\u001b[0m');
       // Use the deployed GCP proxy endpoint for all web requests
       final apiKey = _apiKey;
       print('DEBUG: sheetId=$spreadsheetId, tabName=$sheetName, apiKey=$apiKey');
