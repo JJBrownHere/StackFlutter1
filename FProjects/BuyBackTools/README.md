@@ -69,3 +69,10 @@ lib/
 ## License
 
 This project is proprietary and confidential.
+
+## Local Development
+
+Before running or building, generate your secrets file:
+
+GOOGLE_SHEETS_API_KEY=your_key API_KEY=your_other_key ./generate_secrets.sh
+
