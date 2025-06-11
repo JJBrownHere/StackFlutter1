@@ -7,6 +7,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart';
 import 'package:csv/csv.dart';
 import 'dart:html' as html; // Only for web
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SheetService {
   static const String _spreadsheetId = '120gf3lHO7LOZDoD_F5GqLMSUKwBzjE5XhFDWwIVdoJs';
@@ -37,38 +38,45 @@ class SheetService {
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
     if (kIsWeb) {
-      if (_apiKey == null || _googleSheetsApiKey == null) {
-        throw Exception('API keys not loaded. Call SheetService.loadApiKeys() first.');
+      final session = Supabase.instance.client.auth.currentSession;
+      final accessToken = session?.providerToken;
+      String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
+      final headers = <String, String>{};
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+        print('DEBUG: Using OAuth access token for Sheets API');
+      } else {
+        url += '?key=${_googleSheetsApiKey!}';
+        print('DEBUG: Using API key for Sheets API');
       }
-      print('DEBUG: googleSheetsApiKey at runtime: ' + _googleSheetsApiKey!);
-      print('DEBUG: _apiKey at runtime: ' + _apiKey!);
-      final apiKey = _googleSheetsApiKey!;
-      print('DEBUG: sheetId=$spreadsheetId, tabName=$sheetName, apiKey=$apiKey');
-      if (spreadsheetId.isEmpty || sheetName.isEmpty || apiKey.isEmpty) {
-        throw Exception('Missing required parameter for proxy: sheetId, tabName, or apiKey');
-      }
-      final proxyUrl = 'https://us-central1-stackflutter1.cloudfunctions.net/sheetsProxy'
-        '?sheetId=$spreadsheetId&tabName=${Uri.encodeComponent(sheetName)}&apiKey=$apiKey';
-      print('DEBUG: Using proxy URL: $proxyUrl');
+      print('Google Sheets API call (web): url=$url, accessToken=${accessToken != null}');
+      final response = await http.get(Uri.parse(url), headers: headers);
+      print('Sheets API raw response (web): ${response.body}');
+      dynamic data;
       try {
-        final response = await http.get(Uri.parse(proxyUrl));
-        print('DEBUG: Proxy response status code: ${response.statusCode}');
-        if (response.statusCode != 200) {
-          print('DEBUG: Error response body: ${response.body}');
-          throw Exception('Failed to fetch sheet data from proxy: ${response.statusCode}');
-        }
-        final data = json.decode(response.body);
-        print('DEBUG: Decoded proxy response: $data');
-        final values = data['values'] as List<dynamic>?;
-        if (values == null) return [];
-        final rows = values.map((row) => List<String>.from(row.map((cell) => cell.toString()))).toList();
-        print('DEBUG: Successfully parsed ${rows.length} rows');
-        return rows;
-      } catch (e, stack) {
-        print('DEBUG: Error in proxy sheet fetch: $e');
-        print('DEBUG: Stack trace: $stack');
-        rethrow;
+        data = json.decode(response.body);
+        print('Decoded API response (web): $data');
+      } catch (e) {
+        print('JSON decode error (web): $e');
+        throw Exception('Failed to decode Sheets API response as JSON. Raw response: ${response.body}');
       }
+      if (data is Map && data.containsKey('error')) {
+        print('Google API error (web): ${data['error']}');
+        throw Exception('Google API error: ${data['error']}');
+      }
+      final valuesRaw = data is Map && data.containsKey('values') ? data['values'] : null;
+      print('Raw values array (web): $valuesRaw');
+      if (valuesRaw == null || valuesRaw is! List) throw Exception('No usable rows found in sheet/tab. Raw response: $data');
+      final parsedRows = valuesRaw
+          .where((row) => row is List && row.isNotEmpty)
+          .map((row) => (row as List)
+              .map((cell) => cell == null ? '' : cell.toString())
+              .toList())
+          .toList();
+      print('Parsed rows count (web): ${parsedRows.length}');
+      if (parsedRows.isNotEmpty) print('First parsed row (web): ${parsedRows[0]}');
+      if (parsedRows.isEmpty) throw Exception('No usable rows found in sheet/tab. Check if the tab is empty or the data is malformed.');
+      return parsedRows;
     } else {
       // Mobile path - keep existing code unchanged, but use loaded keys
       final apiKey = _apiKey ?? API_KEY;
