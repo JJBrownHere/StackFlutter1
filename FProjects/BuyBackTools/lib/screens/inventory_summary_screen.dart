@@ -213,10 +213,14 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
     final uniqueEntries = <String, int>{};
     data.forEach((key, value) {
       final normalizedKey = key.trim();
-      if (uniqueEntries.containsKey(normalizedKey)) {
-        uniqueEntries[normalizedKey] = uniqueEntries[normalizedKey]! + value;
+      // If the key is empty or blank, use 'No Color Entered' for color section
+      final displayKey = (title.toLowerCase().contains('color') && (normalizedKey.isEmpty))
+          ? 'No Color Entered'
+          : normalizedKey;
+      if (uniqueEntries.containsKey(displayKey)) {
+        uniqueEntries[displayKey] = uniqueEntries[displayKey]! + value;
       } else {
-        uniqueEntries[normalizedKey] = value;
+        uniqueEntries[displayKey] = value;
       }
     });
     List<MapEntry<String, int>> entries = uniqueEntries.entries.toList();

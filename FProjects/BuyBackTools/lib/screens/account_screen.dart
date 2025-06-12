@@ -253,7 +253,7 @@ class _AccountScreenState extends State<AccountScreen> {
           } else {
             // Linked: show link out to Google Sheet
             final sheetId = inventorySheets[0]['sheet_id'];
-            final sheetName = inventorySheets[0]['sheet_name'] ?? sheetId;
+            final sheetName = inventorySheets[0]['sheet_name'] ?? 'Google Sheet';
             return ListTile(
               title: const Text('STACKS Inventory Sheet: Connected'),
               subtitle: Text(sheetName),
@@ -275,9 +275,10 @@ class _AccountScreenState extends State<AccountScreen> {
           child: Text('Create $label'),
         );
       } else {
+        final sheetName = sheet['sheet_name'] ?? 'Google Sheet';
         return ListTile(
           title: Text('$label: Connected'),
-          subtitle: Text(sheet['sheet_name'] ?? sheet['sheet_id'] ?? ''),
+          subtitle: Text(sheetName),
           trailing: IconButton(
             icon: const Icon(Icons.open_in_new),
             onPressed: () {
