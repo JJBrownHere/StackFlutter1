@@ -253,8 +253,10 @@ class _AccountScreenState extends State<AccountScreen> {
           } else {
             // Linked: show link out to Google Sheet
             final sheetId = inventorySheets[0]['sheet_id'];
+            final sheetName = inventorySheets[0]['sheet_name'] ?? sheetId;
             return ListTile(
               title: const Text('STACKS Inventory Sheet: Connected'),
+              subtitle: Text(sheetName),
               trailing: IconButton(
                 icon: const Icon(Icons.open_in_new),
                 onPressed: () {

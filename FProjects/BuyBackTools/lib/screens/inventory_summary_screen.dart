@@ -333,8 +333,27 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator()),
                 if (_error != null)
-                  SizedBox.shrink(),
-                if (_summary != null)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                  ),
+                if ((_summary == null || _sheetId == null || _sheetId!.isEmpty) && !_isLoading && _error == null)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        const Text('No inventory sheet connected. Please connect a Google Sheet from your Account page.'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/account');
+                          },
+                          child: const Text('Go to Account Page'),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (_summary != null && _sheetId != null && _sheetId!.isNotEmpty && _error == null)
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.85,
                     child: ListView(

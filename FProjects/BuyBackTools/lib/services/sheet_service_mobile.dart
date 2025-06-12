@@ -2,54 +2,69 @@ import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import '../secrets.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:html/parser.dart' as html_parser;
-import 'package:html/dom.dart';
-import 'package:csv/csv.dart';
-import 'dart:html' as html;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SheetService {
   static String? _apiKey;
   static String? _googleSheetsApiKey;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'profile',
+      'https://www.googleapis.com/auth/spreadsheets.readonly',
+      'https://www.googleapis.com/auth/drive.readonly',
+    ],
+  );
 
   static Future<void> loadApiKeys() async {
-    final response = await html.HttpRequest.getString('api_key.json');
-    final data = json.decode(response) as Map<String, dynamic>;
-    _googleSheetsApiKey = data['googleSheetsApiKey'];
-    _apiKey = data['API_KEY'];
+    _googleSheetsApiKey = googleSheetsApiKey;
+    _apiKey = API_KEY;
   }
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
-    final session = Supabase.instance.client.auth.currentSession;
-    final accessToken = session?.providerToken;
-    String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
-    final headers = <String, String>{};
-    if (accessToken != null) {
-      headers['Authorization'] = 'Bearer $accessToken';
-    } else {
-      url += '?key=${_googleSheetsApiKey!}';
-    }
-    final response = await http.get(Uri.parse(url), headers: headers);
-    dynamic data;
+    final apiKey = _apiKey ?? API_KEY;
+    final googleKey = _googleSheetsApiKey ?? googleSheetsApiKey;
     try {
-      data = json.decode(response.body);
-    } catch (e) {
-      throw Exception('Failed to decode Sheets API response as JSON. Raw response: ${response.body}');
+      String? accessToken;
+      try {
+        final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+        if (googleUser != null) {
+          final auth = await googleUser.authentication;
+          accessToken = auth.accessToken;
+        }
+      } catch (e) {
+        // Google sign-in error
+      }
+      String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
+      final headers = <String, String>{};
+      if (accessToken != null) {
+        headers['Authorization'] = 'Bearer $accessToken';
+      } else {
+        url += '?key=$googleKey';
+      }
+      final response = await http.get(Uri.parse(url), headers: headers);
+      dynamic data;
+      try {
+        data = json.decode(response.body);
+      } catch (e) {
+        throw Exception('Failed to decode Sheets API response as JSON. Raw response: ${response.body}');
+      }
+      if (data is Map && data.containsKey('error')) {
+        throw Exception('Google API error: ${data['error']}');
+      }
+      final valuesRaw = data is Map && data.containsKey('values') ? data['values'] : null;
+      if (valuesRaw == null || valuesRaw is! List) throw Exception('No usable rows found in sheet/tab. Raw response: $data');
+      final parsedRows = valuesRaw
+          .where((row) => row is List && row.isNotEmpty)
+          .map((row) => (row as List)
+              .map((cell) => cell == null ? '' : cell.toString())
+              .toList())
+          .toList();
+      if (parsedRows.isEmpty) throw Exception('No usable rows found in sheet/tab. Check if the tab is empty or the data is malformed.');
+      return parsedRows;
+    } catch (e, stack) {
+      rethrow;
     }
-    if (data is Map && data.containsKey('error')) {
-      throw Exception('Google API error: ${data['error']}');
-    }
-    final valuesRaw = data is Map && data.containsKey('values') ? data['values'] : null;
-    if (valuesRaw == null || valuesRaw is! List) throw Exception('No usable rows found in sheet/tab. Raw response: $data');
-    final parsedRows = valuesRaw
-        .where((row) => row is List && row.isNotEmpty)
-        .map((row) => (row as List)
-            .map((cell) => cell == null ? '' : cell.toString())
-            .toList())
-        .toList();
-    if (parsedRows.isEmpty) throw Exception('No usable rows found in sheet/tab. Check if the tab is empty or the data is malformed.');
-    return parsedRows;
   }
 
   Future<List<Map<String, String>>> getAvailablePhones(String spreadsheetId, String sheetName) async {
