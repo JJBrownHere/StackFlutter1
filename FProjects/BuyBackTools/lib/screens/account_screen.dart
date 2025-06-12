@@ -106,7 +106,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _createSheet(String type, String sheetName) async {
     setState(() { _isLoading = true; });
     try {
-      final user = Supabase.instance.client.auth.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
       if (user == null || user.email == null) {
         throw Exception('User not logged in or email not available');
       }
@@ -215,7 +215,7 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() { _isLoading = false; });
+    setState(() { _isLoading = false; });
       }
     }
   }

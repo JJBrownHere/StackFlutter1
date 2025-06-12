@@ -238,22 +238,22 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
         title: Text(
-          title,
+              title,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+            ),
         initiallyExpanded: false,
         children: entries.map((entry) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(entry.key),
-              Text(
-                entry.value.toString(),
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(entry.key),
+                  Text(
+                    entry.value.toString(),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-            ],
-          ),
         )).toList(),
       ),
     );
