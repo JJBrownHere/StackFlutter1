@@ -209,7 +209,12 @@ class HomeScreen extends StatelessWidget {
                         Icons.shopping_cart,
                         Colors.purple,
                         () {
-                          Navigator.pushNamed(context, '/purchase');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PurchaseDeviceScreen(),
+                            ),
+                          );
                         },
                       ),
                     ],
