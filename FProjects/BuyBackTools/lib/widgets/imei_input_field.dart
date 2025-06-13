@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/text_recognition_service.dart';
-import 'neo_container.dart';
+import 'glass_container.dart';
 
 class ImeiInputField extends StatefulWidget {
   final TextEditingController controller;
@@ -75,7 +75,15 @@ class _ImeiInputFieldState extends State<ImeiInputField> {
 
   @override
   Widget build(BuildContext context) {
-    return NeoContainer(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final inputTextColor = isDark ? Colors.white : const Color(0xFF2D3436);
+    final hintTextColor = isDark ? Colors.grey[400] : const Color(0xFF7A8C98);
+    final iconBgColor = isDark ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.5);
+    final iconColor = isDark ? Colors.white : const Color(0xFF2D3436);
+
+    return GlassContainer(
+      borderRadius: 15,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Row(
         children: [
@@ -84,36 +92,24 @@ class _ImeiInputFieldState extends State<ImeiInputField> {
               controller: widget.controller,
               decoration: InputDecoration(
                 hintText: widget.hintText ?? 'Enter IMEI or Serial Number',
-                hintStyle: const TextStyle(
-                  color: Color(0xFF7A8C98),
+                hintStyle: TextStyle(
+                  color: hintTextColor,
                   fontSize: 16,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 15),
               ),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Color(0xFF2D3436),
+                color: inputTextColor,
                 letterSpacing: 0.5,
               ),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFE0E5EC),
+              color: iconBgColor,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-2, -2),
-                  blurRadius: 5,
-                ),
-                BoxShadow(
-                  color: Color(0xFFA3B1C6),
-                  offset: Offset(2, 2),
-                  blurRadius: 5,
-                ),
-              ],
             ),
             child: IconButton(
               icon: _isProcessing
@@ -124,9 +120,9 @@ class _ImeiInputFieldState extends State<ImeiInputField> {
                         strokeWidth: 2,
                       ),
                     )
-                  : const Icon(
+                  : Icon(
                       Icons.camera_alt,
-                      color: Color(0xFF2D3436),
+                      color: iconColor,
                     ),
               onPressed: _isProcessing ? null : _handleCameraTap,
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'glass_container.dart';
 
 class NeoContainer extends StatelessWidget {
   final Widget child;
@@ -52,6 +53,48 @@ class NeoContainer extends StatelessWidget {
               ],
       ),
       child: child,
+    );
+  }
+}
+
+class GlassButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final Widget child;
+  final double width;
+  final double height;
+  final bool isSelected;
+
+  const GlassButton({
+    super.key,
+    required this.onPressed,
+    required this.child,
+    this.width = double.infinity,
+    this.height = 50,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isSelected ? theme.primaryColor.withOpacity(0.3) : Colors.white.withOpacity(0.12);
+    return GestureDetector(
+      onTap: onPressed,
+      child: GlassContainer(
+        borderRadius: 15,
+        opacity: isDark ? 0.12 : 0.18,
+        blur: 18,
+        padding: EdgeInsets.zero,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: borderColor, width: 1.2),
+          ),
+          child: Center(child: child),
+        ),
+      ),
     );
   }
 }

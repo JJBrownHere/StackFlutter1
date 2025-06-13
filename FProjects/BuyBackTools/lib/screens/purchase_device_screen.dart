@@ -7,6 +7,7 @@ import '../widgets/device_details_form.dart';
 import '../widgets/seller_info_form.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
 import '../widgets/glass_container.dart';
+import '../widgets/glass_button.dart';
 
 class PurchaseDeviceScreen extends StatefulWidget {
   const PurchaseDeviceScreen({super.key});
@@ -206,7 +207,7 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               if (_currentStep > 0)
-                                NeoButton(
+                                GlassButton(
                                   width: 120,
                                   height: 45,
                                   onPressed: _handlePreviousStep,
@@ -221,7 +222,7 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                                 )
                               else
                                 const SizedBox(width: 120),
-                              NeoButton(
+                              GlassButton(
                                 width: 120,
                                 height: 45,
                                 onPressed: _handleNextStep,
