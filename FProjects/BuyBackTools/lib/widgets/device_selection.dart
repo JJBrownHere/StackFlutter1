@@ -20,6 +20,10 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
   final List<String> _conditions = ['New', 'Like New', 'Good', 'Fair'];
 
   Widget _buildSelectionGrid(List<String> items, String? selectedItem, Function(String) onSelect) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -41,7 +45,7 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
           child: Text(
             item,
             style: TextStyle(
-              color: isSelected ? Theme.of(context).primaryColor : const Color(0xFF2D3436),
+              color: isSelected ? theme.primaryColor : textColor,
               fontWeight: FontWeight.w500,
               fontSize: 14,
             ),
@@ -53,15 +57,19 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Device Type',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+            color: textColor,
           ),
         ),
         const SizedBox(height: 12),
@@ -72,12 +80,12 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
         }),
         const SizedBox(height: 24),
         if (_selectedDeviceType != null) ...[
-          const Text(
+          Text(
             'Model',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3436),
+              color: textColor,
             ),
           ),
           const SizedBox(height: 12),
@@ -89,12 +97,12 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
           const SizedBox(height: 24),
         ],
         if (_selectedModel != null) ...[
-          const Text(
+          Text(
             'Storage',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3436),
+              color: textColor,
             ),
           ),
           const SizedBox(height: 12),
@@ -106,12 +114,12 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
           const SizedBox(height: 24),
         ],
         if (_selectedStorage != null) ...[
-          const Text(
+          Text(
             'Condition',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3436),
+              color: textColor,
             ),
           ),
           const SizedBox(height: 12),

@@ -12,6 +12,14 @@ class NeoStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark ? theme.scaffoldBackgroundColor : const Color(0xFFE0E5EC);
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
+    final secondaryTextColor = isDark ? Colors.grey[400] : const Color(0xFF7A8C98);
+    final shadowColor = isDark ? Colors.black.withOpacity(0.3) : const Color(0xFFA3B1C6);
+    final lightShadowColor = isDark ? Colors.white.withOpacity(0.1) : Colors.white;
+
     return Container(
       height: 80,
       margin: const EdgeInsets.symmetric(vertical: 16),
@@ -27,21 +35,21 @@ class NeoStepper extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     index ~/ 2 < currentStep 
-                        ? Theme.of(context).primaryColor.withOpacity(0.3)
-                        : const Color(0xFFA3B1C6).withOpacity(0.2),
+                        ? theme.primaryColor.withOpacity(0.3)
+                        : shadowColor.withOpacity(0.2),
                     index ~/ 2 + 1 <= currentStep
-                        ? Theme.of(context).primaryColor.withOpacity(0.3)
-                        : const Color(0xFFA3B1C6).withOpacity(0.2),
+                        ? theme.primaryColor.withOpacity(0.3)
+                        : shadowColor.withOpacity(0.2),
                   ],
                 ),
                 boxShadow: [
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(0, -1),
+                  BoxShadow(
+                    color: lightShadowColor,
+                    offset: const Offset(0, -1),
                     blurRadius: 2,
                   ),
                   BoxShadow(
-                    color: const Color(0xFFA3B1C6),
+                    color: shadowColor,
                     offset: const Offset(0, 1),
                     blurRadius: 2,
                     spreadRadius: index ~/ 2 < currentStep ? 0 : -1,
@@ -59,38 +67,38 @@ class NeoStepper extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: const Color(0xFFE0E5EC),
+              color: backgroundColor,
               shape: BoxShape.circle,
               border: Border.all(
                 color: isCompleted || isCurrent
-                    ? Theme.of(context).primaryColor.withOpacity(0.3)
+                    ? theme.primaryColor.withOpacity(0.3)
                     : Colors.transparent,
                 width: 2,
               ),
               boxShadow: isCurrent
                   ? [
-                      const BoxShadow(
-                        color: Color(0xFFA3B1C6),
-                        offset: Offset(-2, -2),
+                      BoxShadow(
+                        color: shadowColor,
+                        offset: const Offset(-2, -2),
                         blurRadius: 5,
                         spreadRadius: 1,
                       ),
-                      const BoxShadow(
-                        color: Colors.white,
-                        offset: Offset(2, 2),
+                      BoxShadow(
+                        color: lightShadowColor,
+                        offset: const Offset(2, 2),
                         blurRadius: 5,
                         spreadRadius: 1,
                       ),
                     ]
                   : [
-                      const BoxShadow(
-                        color: Colors.white,
-                        offset: Offset(-4, -4),
+                      BoxShadow(
+                        color: lightShadowColor,
+                        offset: const Offset(-4, -4),
                         blurRadius: 10,
                       ),
-                      const BoxShadow(
-                        color: Color(0xFFA3B1C6),
-                        offset: Offset(4, 4),
+                      BoxShadow(
+                        color: shadowColor,
+                        offset: const Offset(4, 4),
                         blurRadius: 10,
                       ),
                     ],
@@ -104,8 +112,8 @@ class NeoStepper extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       color: isCompleted || isCurrent
-                          ? Theme.of(context).primaryColor
-                          : const Color(0xFF7A8C98),
+                          ? theme.primaryColor
+                          : secondaryTextColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -115,8 +123,8 @@ class NeoStepper extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       color: isCompleted || isCurrent
-                          ? Theme.of(context).primaryColor
-                          : const Color(0xFF7A8C98),
+                          ? theme.primaryColor
+                          : secondaryTextColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

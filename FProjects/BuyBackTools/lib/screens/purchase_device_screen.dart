@@ -135,23 +135,29 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark ? theme.scaffoldBackgroundColor : const Color(0xFFE0E5EC);
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
+    final secondaryTextColor = isDark ? Colors.grey[400] : const Color(0xFF7A8C98);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE0E5EC),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFFE0E5EC),
-        title: const Text(
+        backgroundColor: backgroundColor,
+        title: Text(
           'Purchase Device',
           style: TextStyle(
-            color: Color(0xFF2D3436),
+            color: textColor,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
-            color: Color(0xFF2D3436),
+            color: textColor,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -176,19 +182,19 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                       children: [
                         Text(
                           _getStepTitle(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF2D3436),
+                            color: textColor,
                             letterSpacing: 0.5,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           _getStepDescription(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: Color(0xFF7A8C98),
+                            color: secondaryTextColor,
                             letterSpacing: 0.3,
                           ),
                         ),
@@ -202,10 +208,10 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                                 width: 120,
                                 height: 45,
                                 onPressed: _handlePreviousStep,
-                                child: const Text(
+                                child: Text(
                                   'Previous',
                                   style: TextStyle(
-                                    color: Color(0xFF2D3436),
+                                    color: textColor,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 15,
                                   ),
@@ -219,8 +225,8 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                               onPressed: _handleNextStep,
                               child: Text(
                                 _currentStep == _steps.length - 1 ? 'Finish' : 'Next',
-                                style: const TextStyle(
-                                  color: Color(0xFF2D3436),
+                                style: TextStyle(
+                                  color: textColor,
                                   fontWeight: FontWeight.w500,
                                   fontSize: 15,
                                 ),
