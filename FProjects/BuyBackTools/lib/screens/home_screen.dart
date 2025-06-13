@@ -7,6 +7,7 @@ import '../helpers/session_helper.dart';
 import 'inventory_summary_screen.dart';
 import 'purchase_device_screen.dart';
 import '../widgets/glass_container.dart';
+import 'package:BuyBackTools/app_state.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
