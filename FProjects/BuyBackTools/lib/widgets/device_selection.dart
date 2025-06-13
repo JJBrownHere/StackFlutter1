@@ -38,7 +38,7 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
         final item = items[index];
         final isSelected = item == selectedItem;
         
-        return NeoButton(
+        return GlassButton(
           onPressed: () => onSelect(item),
           isSelected: isSelected,
           height: 40,

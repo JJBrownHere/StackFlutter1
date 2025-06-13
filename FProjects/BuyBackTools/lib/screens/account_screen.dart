@@ -398,20 +398,6 @@ class _AccountScreenState extends State<AccountScreen> {
                   value: true,
                   onChanged: (value) {},
                 ),
-                SwitchListTile(
-                  title: const Text('Dark Mode'),
-                  subtitle: const Text('Toggle dark theme'),
-                  value: Theme.of(context).brightness == Brightness.dark,
-                  onChanged: (isDark) {
-                    final appState = context.findAncestorStateOfType<MyAppState>();
-                    appState?.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
-                  },
-                  secondary: Icon(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Icons.dark_mode
-                        : Icons.light_mode,
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 24),

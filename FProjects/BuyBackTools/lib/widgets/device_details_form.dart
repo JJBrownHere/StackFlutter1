@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'neo_container.dart';
+import 'glass_container.dart';
 
 class DeviceDetailsForm extends StatefulWidget {
   const DeviceDetailsForm({super.key});
@@ -24,31 +25,35 @@ class _DeviceDetailsFormState extends State<DeviceDetailsForm> {
   ];
 
   Widget _buildTextField(String label, TextEditingController controller, {int? maxLines}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
+    final hintTextColor = isDark ? Colors.grey[400] : const Color(0xFF7A8C98);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+            color: textColor,
           ),
         ),
         const SizedBox(height: 8),
-        NeoContainer(
+        GlassContainer(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: TextField(
             controller: controller,
             maxLines: maxLines,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
               hintStyle: TextStyle(
-                color: Color(0xFF7A8C98),
+                color: hintTextColor,
               ),
             ),
-            style: const TextStyle(
-              color: Color(0xFF2D3436),
+            style: TextStyle(
+              color: textColor,
             ),
           ),
         ),
@@ -57,6 +62,9 @@ class _DeviceDetailsFormState extends State<DeviceDetailsForm> {
   }
 
   Widget _buildAccessoriesGrid() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -71,7 +79,7 @@ class _DeviceDetailsFormState extends State<DeviceDetailsForm> {
         final accessory = _availableAccessories[index];
         final isSelected = _selectedAccessories.contains(accessory);
         
-        return NeoButton(
+        return GlassButton(
           onPressed: () {
             setState(() {
               if (isSelected) {
@@ -85,7 +93,7 @@ class _DeviceDetailsFormState extends State<DeviceDetailsForm> {
           child: Text(
             accessory,
             style: TextStyle(
-              color: isSelected ? Theme.of(context).primaryColor : const Color(0xFF2D3436),
+              color: isSelected ? theme.primaryColor : textColor,
               fontWeight: FontWeight.bold,
             ),
           ),

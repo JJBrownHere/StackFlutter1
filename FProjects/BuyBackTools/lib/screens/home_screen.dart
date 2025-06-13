@@ -7,6 +7,7 @@ import '../helpers/session_helper.dart';
 import 'inventory_summary_screen.dart';
 import 'purchase_device_screen.dart';
 import '../widgets/glass_container.dart';
+import '../app_state.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -114,6 +115,19 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 );
+              },
+            ),
+            SwitchListTile(
+              title: const Text('Dark Mode'),
+              secondary: Icon(
+                Theme.of(context).brightness == Brightness.dark
+                    ? Icons.dark_mode
+                    : Icons.light_mode,
+              ),
+              value: Theme.of(context).brightness == Brightness.dark,
+              onChanged: (isDark) {
+                final appState = context.findAncestorStateOfType<MyAppState>();
+                appState?.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
               },
             ),
             const Divider(),
