@@ -6,6 +6,7 @@ import 'imei_checks_screen.dart';
 import '../helpers/session_helper.dart';
 import 'inventory_summary_screen.dart';
 import 'purchase_device_screen.dart';
+import '../widgets/glass_container.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -235,33 +236,20 @@ class HomeScreen extends StatelessWidget {
     Color color,
     VoidCallback onTap,
   ) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return GlassContainer(
+      borderRadius: 16,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.8),
-                color,
-              ],
-            ),
-          ),
+          height: 140,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
                 size: 48,
-                color: Colors.white,
+                color: color,
               ),
               const SizedBox(height: 8),
               Text(
@@ -269,7 +257,7 @@ class HomeScreen extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Color(0xFF2D3436),
                 ),
                 textAlign: TextAlign.center,
               ),

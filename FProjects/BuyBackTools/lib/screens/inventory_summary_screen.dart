@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../helpers/keyboard_dismiss_wrapper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/glass_container.dart';
 
 class InventorySummaryScreen extends StatefulWidget {
   const InventorySummaryScreen({super.key});
@@ -238,8 +239,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
       // Sort colors alphabetically
       entries.sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
     }
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+    return GlassContainer(
       child: ExpansionTile(
         title: Text(
               title,
@@ -363,7 +363,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
                     child: ListView(
                       shrinkWrap: true,
                       children: [
-                        Card(
+                        GlassContainer(
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -451,8 +451,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
             final search = _phoneSearch.toLowerCase();
             return model.contains(search) || storage.contains(search) || condition.contains(search);
           }).toList();
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+    return GlassContainer(
       child: ExpansionTile(
         title: const Text(
           'Available Phones',
@@ -493,8 +492,7 @@ class _InventorySummaryScreenState extends State<InventorySummaryScreen> {
             ),
           ...filteredPhones.map((phone) {
             final model = phone['Model'] ?? '';
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            return GlassContainer(
               child: ListTile(
                 title: Text(model),
                 subtitle: Text('${phone['Storage'] ?? ''} | ${phone['Condition'] ?? ''}'),

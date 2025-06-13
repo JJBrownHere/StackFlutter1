@@ -6,6 +6,7 @@ import 'login_screen.dart';
 import '../services/inventory_sheet_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../widgets/glass_container.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -375,8 +376,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
             ),
-            Card(
-              elevation: 2,
+            GlassContainer(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -445,8 +445,7 @@ class _AccountScreenState extends State<AccountScreen> {
     required String title,
     required List<Widget> children,
   }) {
-    return Card(
-      elevation: 2,
+    return GlassContainer(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

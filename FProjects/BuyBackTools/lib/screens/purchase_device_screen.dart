@@ -6,6 +6,7 @@ import '../widgets/device_selection.dart';
 import '../widgets/device_details_form.dart';
 import '../widgets/seller_info_form.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
+import '../widgets/glass_container.dart';
 
 class PurchaseDeviceScreen extends StatefulWidget {
   const PurchaseDeviceScreen({super.key});
@@ -137,7 +138,7 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = isDark ? theme.scaffoldBackgroundColor : const Color(0xFFE0E5EC);
+    final backgroundColor = theme.scaffoldBackgroundColor;
     final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
     final secondaryTextColor = isDark ? Colors.grey[400] : const Color(0xFF7A8C98);
 
@@ -177,64 +178,66 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getStepTitle(),
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                            letterSpacing: 0.5,
+                    child: GlassContainer(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getStepTitle(),
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                              letterSpacing: 0.5,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _getStepDescription(),
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: secondaryTextColor,
-                            letterSpacing: 0.3,
+                          const SizedBox(height: 8),
+                          Text(
+                            _getStepDescription(),
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: secondaryTextColor,
+                              letterSpacing: 0.3,
+                            ),
                           ),
-                        ),
-                        _buildStepContent(),
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (_currentStep > 0)
+                          _buildStepContent(),
+                          const SizedBox(height: 32),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (_currentStep > 0)
+                                NeoButton(
+                                  width: 120,
+                                  height: 45,
+                                  onPressed: _handlePreviousStep,
+                                  child: Text(
+                                    'Previous',
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                )
+                              else
+                                const SizedBox(width: 120),
                               NeoButton(
                                 width: 120,
                                 height: 45,
-                                onPressed: _handlePreviousStep,
+                                onPressed: _handleNextStep,
                                 child: Text(
-                                  'Previous',
+                                  _currentStep == _steps.length - 1 ? 'Finish' : 'Next',
                                   style: TextStyle(
                                     color: textColor,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 15,
                                   ),
                                 ),
-                              )
-                            else
-                              const SizedBox(width: 120),
-                            NeoButton(
-                              width: 120,
-                              height: 45,
-                              onPressed: _handleNextStep,
-                              child: Text(
-                                _currentStep == _steps.length - 1 ? 'Finish' : 'Next',
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15,
-                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

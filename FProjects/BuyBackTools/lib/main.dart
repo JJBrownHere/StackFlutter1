@@ -79,10 +79,12 @@ class MyAppState extends State<MyApp> {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
             useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFFE0E5EC),
           ),
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
             useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFF181A1B),
           ),
           themeMode: _themeMode,
           initialRoute: '/',

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import '../services/price_service.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
+import '../widgets/glass_container.dart';
 
 class PriceChecksScreen extends StatefulWidget {
   const PriceChecksScreen({super.key});
@@ -259,9 +260,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
     }
     if (!isMobile) {
       // Table layout for wide screens
-      return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        color: cardColor,
+      return GlassContainer(
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -324,9 +323,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
               for (final company in companies)
                 SizedBox(
                   width: (MediaQuery.of(context).size.width - 40) / 2, // 2 cards per row with some margin
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    color: cardColor,
+                  child: GlassContainer(
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Column(
@@ -384,9 +381,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
     }
     if (!isMobile) {
       // Table layout for wide screens
-      return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        color: cardColor,
+      return GlassContainer(
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -437,9 +432,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
           ...companies.map((c) {
             final value = tradeinPricing[c['id']] != null ? tradeinPricing[c['id']]['upTo'] : null;
             final isMax = value != null && value.toDouble() == maxValue;
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              color: cardColor,
+            return GlassContainer(
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Row(
@@ -496,9 +489,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
     }
     if (!isMobile) {
       // Table layout for wide screens
-      return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        color: cardColor,
+      return GlassContainer(
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -556,9 +547,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
           ),
           ...vendors.map((vendor) {
             final prices = salePricing[vendor['id']] ?? {};
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              color: cardColor,
+            return GlassContainer(
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Column(
@@ -621,8 +610,7 @@ class _PriceChecksScreenState extends State<PriceChecksScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
+        GlassContainer(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
