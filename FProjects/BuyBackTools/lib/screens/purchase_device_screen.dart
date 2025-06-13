@@ -5,7 +5,6 @@ import '../widgets/neo_stepper.dart';
 import '../widgets/device_selection.dart';
 import '../widgets/device_details_form.dart';
 import '../widgets/seller_info_form.dart';
-import '../widgets/keyboard_dismiss_on_tap.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
 
 class PurchaseDeviceScreen extends StatefulWidget {
