@@ -222,7 +222,7 @@
     },
     {
       "name": "google_sign_in",
-      "version": "5.4.4",
+      "version": "6.3.0",
       "dependencies": [
         "flutter",
         "google_sign_in_android",
@@ -855,12 +855,14 @@
     },
     {
       "name": "google_sign_in_web",
-      "version": "0.10.2+1",
+      "version": "0.12.4+4",
       "dependencies": [
         "flutter",
         "flutter_web_plugins",
+        "google_identity_services_web",
         "google_sign_in_platform_interface",
-        "js"
+        "http",
+        "web"
       ]
     },
     {
@@ -1074,10 +1076,11 @@
       ]
     },
     {
-      "name": "js",
-      "version": "0.6.7",
+      "name": "google_identity_services_web",
+      "version": "0.3.3+1",
       "dependencies": [
-        "meta"
+        "meta",
+        "web"
       ]
     },
     {

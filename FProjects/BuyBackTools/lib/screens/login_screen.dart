@@ -12,6 +12,10 @@ import '../helpers/keyboard_dismiss_wrapper.dart';
 // Conditional import for mobile deep link handling
 import 'login_links_mobile.dart'
   if (dart.library.html) 'login_links_stub.dart';
+// Conditional import for Apple Sign-In
+import 'sign_in_with_apple_stub.dart'
+  if (dart.library.io) 'package:sign_in_with_apple/sign_in_with_apple.dart'
+  if (dart.library.html) 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,39 +51,58 @@ class _LoginScreenState extends State<LoginScreen> {
         });
         return;
       } else {
+        print('DEBUG: Starting native Google sign-in');
         final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-        print('googleUser: $googleUser');
-        if (googleUser == null) return;
+        print('DEBUG: googleUser: $googleUser');
+        if (googleUser == null) {
+          print('DEBUG: googleUser is null, user cancelled or error');
+          setState(() { _isLoading = false; });
+          return;
+        }
 
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-        print('googleAuth: $googleAuth');
-        print('idToken: \\${googleAuth.idToken}');
-        print('accessToken: \\${googleAuth.accessToken}');
-        if (googleAuth == null || googleAuth.idToken == null || googleAuth.accessToken == null) {
+        print('DEBUG: googleAuth: $googleAuth');
+        print('DEBUG: idToken: ${googleAuth.idToken}');
+        print('DEBUG: accessToken: ${googleAuth.accessToken}');
+        if (googleAuth.idToken == null || googleAuth.accessToken == null) {
+          print('DEBUG: idToken or accessToken is null');
           setState(() {
             _isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Google authentication failed.'),
+              content: Text('Google authentication failed: idToken or accessToken is null.'),
               backgroundColor: Colors.red,
             ),
           );
           return;
         }
-        await Supabase.instance.client.auth.signInWithIdToken(
-          provider: OAuthProvider.google,
-          idToken: googleAuth.idToken!,
-          accessToken: googleAuth.accessToken,
-        );
-        print('Session after Google login: \\${Supabase.instance.client.auth.currentSession}');
+        try {
+          await Supabase.instance.client.auth.signInWithIdToken(
+            provider: OAuthProvider.google,
+            idToken: googleAuth.idToken!,
+            accessToken: googleAuth.accessToken,
+          );
+          print('DEBUG: Supabase signInWithIdToken succeeded');
+        } catch (e, st) {
+          print('DEBUG: Supabase signInWithIdToken error: $e\n$st');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Supabase signInWithIdToken error: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() { _isLoading = false; });
+          return;
+        }
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         }
       }
-    } catch (error) {
+    } catch (error, stack) {
+      print('DEBUG: Exception in _handleGoogleSignIn: $error\n$stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -98,6 +121,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleAppleSignIn() async {
+    if (!kIsWeb && !Platform.isIOS) {
+      return; // Do nothing on non-iOS, non-web platforms
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -108,11 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
           OAuthProvider.apple,
           redirectTo: 'https://itscrazyamazing.com/auth-callback',
         );
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      } else {
+      } else if (Platform.isIOS) {
         final credential = await SignInWithApple.getAppleIDCredential(
           scopes: [
             AppleIDAuthorizationScopes.email,
@@ -123,18 +146,18 @@ class _LoginScreenState extends State<LoginScreen> {
           provider: OAuthProvider.apple,
           idToken: credential.identityToken!,
         );
-        print('Session after Apple login: \\${Supabase.instance.client.auth.currentSession}');
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         }
       }
-    } catch (error) {
+    } catch (e) {
+      print('Apple Sign In Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error signing in with Apple: $error'),
+            content: Text('Error signing in with Apple: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -201,9 +224,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  SignInWithAppleButton(
-                    onPressed: _handleAppleSignIn,
-                    style: SignInWithAppleButtonStyle.black,
+                  Builder(
+                    builder: (context) {
+                      if (kIsWeb || Platform.isIOS) {
+                        return SignInWithAppleButton(
+                          onPressed: _handleAppleSignIn,
+                          style: SignInWithAppleButtonStyle.black,
+                        );
+                      }
+                      return const SizedBox.shrink(); // Hide on Android
+                    },
                   ),
                   if (kDebugMode) ...[
                     const SizedBox(height: 32),

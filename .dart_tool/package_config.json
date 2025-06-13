@@ -176,10 +176,16 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "google_sign_in",
-      "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/google_sign_in-5.4.4",
+      "name": "google_identity_services_web",
+      "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/google_identity_services_web-0.3.3+1",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "google_sign_in",
+      "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/google_sign_in-6.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
     },
     {
       "name": "google_sign_in_android",
@@ -201,9 +207,9 @@
     },
     {
       "name": "google_sign_in_web",
-      "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/google_sign_in_web-0.10.2+1",
+      "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/google_sign_in_web-0.12.4+4",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "gotrue",
@@ -274,12 +280,6 @@
     {
       "name": "image_picker_windows",
       "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.1+1",
-      "packageUri": "lib/",
-      "languageVersion": "2.19"
-    },
-    {
-      "name": "js",
-      "rootUri": "file:///Users/jjbrown/.pub-cache/hosted/pub.dev/js-0.6.7",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },

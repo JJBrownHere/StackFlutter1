@@ -37,7 +37,7 @@ dependencies:
   
   # Authentication
   google_sign_in: ^6.2.1
-  sign_in_with_apple: ^7.0.1
+  sign_in_with_apple: ^7.0.1  # Used for iOS and web platforms only
   supabase_flutter: ^2.9.0
   supabase: ^2.7.0
   gotrue: ^2.12.0

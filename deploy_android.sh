@@ -6,8 +6,9 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Store the original directory
+# Store the original directory and project directory
 ORIGINAL_DIR=$(pwd)
+PROJECT_DIR="$ORIGINAL_DIR/FProjects/BuyBackTools"
 
 # Function to show progress
 show_progress() {
@@ -72,103 +73,105 @@ handle_termination() {
     return 0
 }
 
-echo -e "${GREEN}=== Starting Android Deployment kewlwerkJJ===${NC}"
-
-# Verify project structure
-echo -e "\n${YELLOW}Verifying project structure...${NC}"
-if [ ! -d "FProjects/BuyBackTools" ]; then
-    echo -e "${RED}Error: FProjects/BuyBackTools directory not found${NC}"
-    echo -e "${YELLOW}Current directory: $(pwd)${NC}"
-    echo -e "${YELLOW}Expected structure:${NC}"
-    echo "  FProjects/"
-    echo "    └── BuyBackTools/"
-    echo "        ├── android/"
-    echo "        ├── lib/"
-    echo "        └── pubspec.yaml"
-    exit 1
-fi
-
-# Navigate to Flutter project
-echo -e "\n${YELLOW}Navigating to Flutter project...${NC}"
-cd FProjects/BuyBackTools || { 
-    echo -e "${RED}Failed to navigate to project directory${NC}"
-    echo -e "${YELLOW}Current directory: $(pwd)${NC}"
-    exit 1
+# Function to force remove directories
+force_remove_dir() {
+    local dir=$1
+    if [ -d "$dir" ]; then
+        echo -e "${YELLOW}Force removing $dir...${NC}"
+        find "$dir" -type f -exec chmod 644 {} \;
+        find "$dir" -type d -exec chmod 755 {} \;
+        rm -rf "$dir" 2>/dev/null || true
+    fi
 }
 
-# Verify we're in the right place
-if [ ! -f "pubspec.yaml" ]; then
-    echo -e "${RED}Error: pubspec.yaml not found in $(pwd)${NC}"
-    echo -e "${YELLOW}Please ensure you're running the script from the project root${NC}"
+# Function to verify Google Sign-In configuration
+verify_google_config() {
+    echo -e "\n${YELLOW}Verifying Google Sign-In configuration...${NC}"
+    
+    # Check for google-services.json
+    if [ ! -f "$PROJECT_DIR/android/app/google-services.json" ]; then
+        echo -e "${RED}Error: google-services.json not found in android/app/ directory${NC}"
+        return 1
+    fi
+    
+    # Check for required dependencies in build.gradle
+    if ! grep -q "com.google.gms:google-services" "$PROJECT_DIR/android/build.gradle"; then
+        echo -e "${RED}Error: Google Services plugin not found in project build.gradle${NC}"
+        return 1
+    fi
+    
+    if ! grep -q "com.google.android.gms:play-services-auth" "$PROJECT_DIR/android/app/build.gradle"; then
+        echo -e "${RED}Error: Play Services Auth dependency not found in app build.gradle${NC}"
+        return 1
+    fi
+    
+    return 0
+}
+
+echo -e "${GREEN}=== Starting Android Deployment ===${NC}"
+
+# Verify we're in the correct directory
+if [ ! -f "$PROJECT_DIR/lib/main.dart" ]; then
+    echo -e "${RED}Error: lib/main.dart not found in $PROJECT_DIR${NC}"
     exit 1
 fi
 
-# Check for connected devices
-echo -e "\n${YELLOW}Checking for connected devices...${NC}"
-DEVICE=$(flutter devices | grep -o "RFCRA18GTEZ" || echo "")
-if [ -z "$DEVICE" ]; then
-    echo -e "${RED}No compatible device found${NC}"
-    exit 1
-fi
-echo -e "${GREEN}Device found: $DEVICE${NC}"
+echo -e "${GREEN}Working directory: $PROJECT_DIR${NC}"
 
-# Clean Android project only
-echo -e "\n${YELLOW}=== Cleaning Android Project ===${NC}"
-echo "Running Android clean..."
-cd android && ./gradlew clean > /dev/null 2>&1 & CLEAN_PID=$!
-spinner $CLEAN_PID &
-SPINNER_PID=$!
-
-if ! handle_termination $CLEAN_PID $SPINNER_PID 120 "Clean operation"; then
-    echo -e "${YELLOW}Attempting to force clean...${NC}"
-    rm -rf build/ .gradle/
-    ./gradlew clean --info
-    cd "$ORIGINAL_DIR"
+# Verify Google Sign-In configuration
+if ! verify_google_config; then
+    echo -e "${RED}Google Sign-In configuration verification failed${NC}"
     exit 1
 fi
 
-cd "$ORIGINAL_DIR/FProjects/BuyBackTools"
+# Thorough cleanup of Android build files
+echo -e "\n${YELLOW}Performing thorough cleanup...${NC}"
+
+# Clean Flutter
+echo -e "${YELLOW}Cleaning Flutter...${NC}"
+(cd "$PROJECT_DIR" && flutter clean)
+
+# Force remove problematic directories
+echo -e "${YELLOW}Force removing build directories...${NC}"
+rm -rf "$PROJECT_DIR/build"
+rm -rf "$PROJECT_DIR/.dart_tool"
+rm -rf "$PROJECT_DIR/android/.gradle"
+rm -rf "$PROJECT_DIR/android/build"
+rm -rf "$PROJECT_DIR/android/app/build"
+rm -rf "$PROJECT_DIR/build/app_links"
+rm -rf "$PROJECT_DIR/build/url_launcher_android"
+
+# Clean Gradle
+echo -e "\n${YELLOW}Cleaning Gradle...${NC}"
+(cd "$PROJECT_DIR/android" && ./gradlew clean --info --stacktrace)
+
 show_progress 1 4
 
 # Get dependencies
-echo -e "\n${YELLOW}=== Getting Dependencies ===${NC}"
-flutter pub get > /dev/null 2>&1 & DEPS_PID=$!
-spinner $DEPS_PID &
-SPINNER_PID=$!
-
-if ! handle_termination $DEPS_PID $SPINNER_PID 180 "Dependencies operation"; then
-    cd "$ORIGINAL_DIR"
-    exit 1
-fi
+echo -e "\n${YELLOW}Getting dependencies...${NC}"
+(cd "$PROJECT_DIR" && flutter pub get)
 
 show_progress 2 4
 
 # Build APK
-echo -e "\n${YELLOW}=== Building APK ===${NC}"
-flutter build apk --debug > /dev/null 2>&1 & BUILD_PID=$!
-spinner $BUILD_PID &
-SPINNER_PID=$!
-
-if ! handle_termination $BUILD_PID $SPINNER_PID 600 "Build operation"; then
-    cd "$ORIGINAL_DIR"
-    exit 1
-fi
+echo -e "\n${YELLOW}Building APK...${NC}"
+(cd "$PROJECT_DIR" && flutter build apk --release)
 
 show_progress 3 4
 
-# Install and run
-echo -e "\n${YELLOW}=== Installing and Running ===${NC}"
-flutter run -d RFCRA18GTEZ --no-pub > /dev/null 2>&1 & RUN_PID=$!
-spinner $RUN_PID &
-SPINNER_PID=$!
-
-if ! handle_termination $RUN_PID $SPINNER_PID 300 "Run operation"; then
-    cd "$ORIGINAL_DIR"
+# Check for connected device
+DEVICE=$(cd "$PROJECT_DIR" && flutter devices | grep -o "RFCRA18GTEZ" || echo "")
+if [ -z "$DEVICE" ]; then
+    echo -e "${RED}No compatible device found${NC}"
     exit 1
 fi
 
+# Install and run
+echo -e "\n${YELLOW}Installing and running...${NC}"
+(cd "$PROJECT_DIR" && flutter run -d RFCRA18GTEZ)
+
 show_progress 4 4
 
-cd "$ORIGINAL_DIR"
 echo -e "\n${GREEN}Deployment complete!${NC}"
-echo -e "${YELLOW}Check your device for the app.${NC}" 
+echo -e "${YELLOW}Testing Google login...${NC}"
+echo -e "${YELLOW}Please verify the app opens and Google login works on your device.${NC}" 
