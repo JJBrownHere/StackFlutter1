@@ -9,6 +9,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import '../helpers/session_helper.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
+import 'dart:convert';
 // Conditional import for mobile deep link handling
 import 'login_links_mobile.dart'
   if (dart.library.html) 'login_links_stub.dart';
@@ -26,7 +27,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
-  final _googleSignIn = GoogleSignIn();
+  // Use the Web Client ID for serverClientId on Android only
+  final _googleSignIn = GoogleSignIn(
+    serverClientId: Platform.isAndroid
+      ? '670058417215-1sih5511cflim0ks2nkqdhpevv9teg3h.apps.googleusercontent.com'
+      : null,
+  );
 
   @override
   void initState() {
@@ -62,8 +68,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
         print('DEBUG: googleAuth: $googleAuth');
-        print('DEBUG: idToken: ${googleAuth.idToken}');
-        print('DEBUG: accessToken: ${googleAuth.accessToken}');
+        print('DEBUG: idToken: \\${googleAuth.idToken}');
+        print('DEBUG: accessToken: \\${googleAuth.accessToken}');
+        // Print the decoded payload of the idToken for debugging
+        if (googleAuth.idToken != null) {
+          final parts = googleAuth.idToken!.split('.');
+          if (parts.length == 3) {
+            final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+            print('DEBUG: idToken payload: $payload');
+          }
+        }
         if (googleAuth.idToken == null || googleAuth.accessToken == null) {
           print('DEBUG: idToken or accessToken is null');
           setState(() {
