@@ -145,6 +145,7 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
           style: TextStyle(
             color: Color(0xFF2D3436),
             fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
         leading: IconButton(
@@ -176,7 +177,7 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                         Text(
                           _getStepTitle(),
                           style: const TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2D3436),
                             letterSpacing: 0.5,
@@ -186,7 +187,7 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                         Text(
                           _getStepDescription(),
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             color: Color(0xFF7A8C98),
                             letterSpacing: 0.3,
                           ),
@@ -199,12 +200,14 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                             if (_currentStep > 0)
                               NeoButton(
                                 width: 120,
+                                height: 45,
                                 onPressed: _handlePreviousStep,
                                 child: const Text(
                                   'Previous',
                                   style: TextStyle(
                                     color: Color(0xFF2D3436),
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15,
                                   ),
                                 ),
                               )
@@ -212,12 +215,14 @@ class _PurchaseDeviceScreenState extends State<PurchaseDeviceScreen> {
                               const SizedBox(width: 120),
                             NeoButton(
                               width: 120,
+                              height: 45,
                               onPressed: _handleNextStep,
                               child: Text(
                                 _currentStep == _steps.length - 1 ? 'Finish' : 'Next',
                                 style: const TextStyle(
                                   color: Color(0xFF2D3436),
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
                                 ),
                               ),
                             ),

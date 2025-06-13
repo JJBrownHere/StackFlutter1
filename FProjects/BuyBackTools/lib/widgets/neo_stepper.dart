@@ -27,11 +27,11 @@ class NeoStepper extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     index ~/ 2 < currentStep 
-                        ? Theme.of(context).primaryColor.withOpacity(0.5)
-                        : const Color(0xFFA3B1C6).withOpacity(0.3),
+                        ? Theme.of(context).primaryColor.withOpacity(0.3)
+                        : const Color(0xFFA3B1C6).withOpacity(0.2),
                     index ~/ 2 + 1 <= currentStep
-                        ? Theme.of(context).primaryColor.withOpacity(0.5)
-                        : const Color(0xFFA3B1C6).withOpacity(0.3),
+                        ? Theme.of(context).primaryColor.withOpacity(0.3)
+                        : const Color(0xFFA3B1C6).withOpacity(0.2),
                   ],
                 ),
                 boxShadow: [
@@ -56,8 +56,8 @@ class NeoStepper extends StatelessWidget {
           final isCurrent = stepIndex == currentStep;
 
           return Container(
-            width: 48,
-            height: 48,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: const Color(0xFFE0E5EC),
               shape: BoxShape.circle,
@@ -102,7 +102,7 @@ class NeoStepper extends StatelessWidget {
                   Text(
                     '${stepIndex + 1}',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       color: isCompleted || isCurrent
                           ? Theme.of(context).primaryColor
                           : const Color(0xFF7A8C98),
@@ -113,10 +113,11 @@ class NeoStepper extends StatelessWidget {
                   Text(
                     steps[stepIndex],
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       color: isCompleted || isCurrent
                           ? Theme.of(context).primaryColor
                           : const Color(0xFF7A8C98),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

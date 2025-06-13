@@ -25,9 +25,9 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 2.5,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        childAspectRatio: 3.0,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -37,11 +37,13 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
         return NeoButton(
           onPressed: () => onSelect(item),
           isSelected: isSelected,
+          height: 40,
           child: Text(
             item,
             style: TextStyle(
               color: isSelected ? Theme.of(context).primaryColor : const Color(0xFF2D3436),
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
             ),
           ),
         );
@@ -62,57 +64,63 @@ class _DeviceSelectionFormState extends State<DeviceSelectionForm> {
             color: Color(0xFF2D3436),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildSelectionGrid(
-          _deviceTypes,
-          _selectedDeviceType,
-          (value) => setState(() => _selectedDeviceType = value),
-        ),
+        const SizedBox(height: 12),
+        _buildSelectionGrid(_deviceTypes, _selectedDeviceType, (value) {
+          setState(() {
+            _selectedDeviceType = value;
+          });
+        }),
         const SizedBox(height: 24),
-        const Text(
-          'Model',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+        if (_selectedDeviceType != null) ...[
+          const Text(
+            'Model',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2D3436),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildSelectionGrid(
-          _models,
-          _selectedModel,
-          (value) => setState(() => _selectedModel = value),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Storage',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+          const SizedBox(height: 12),
+          _buildSelectionGrid(_models, _selectedModel, (value) {
+            setState(() {
+              _selectedModel = value;
+            });
+          }),
+          const SizedBox(height: 24),
+        ],
+        if (_selectedModel != null) ...[
+          const Text(
+            'Storage',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2D3436),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildSelectionGrid(
-          _storageOptions,
-          _selectedStorage,
-          (value) => setState(() => _selectedStorage = value),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Condition',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+          const SizedBox(height: 12),
+          _buildSelectionGrid(_storageOptions, _selectedStorage, (value) {
+            setState(() {
+              _selectedStorage = value;
+            });
+          }),
+          const SizedBox(height: 24),
+        ],
+        if (_selectedStorage != null) ...[
+          const Text(
+            'Condition',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2D3436),
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildSelectionGrid(
-          _conditions,
-          _selectedCondition,
-          (value) => setState(() => _selectedCondition = value),
-        ),
+          const SizedBox(height: 12),
+          _buildSelectionGrid(_conditions, _selectedCondition, (value) {
+            setState(() {
+              _selectedCondition = value;
+            });
+          }),
+        ],
       ],
     );
   }
