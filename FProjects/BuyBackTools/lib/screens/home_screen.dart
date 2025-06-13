@@ -5,6 +5,7 @@ import 'price_checks_screen.dart';
 import 'imei_checks_screen.dart';
 import '../helpers/session_helper.dart';
 import 'inventory_summary_screen.dart';
+import 'purchase_device_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -78,15 +79,6 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/account');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.credit_card),
-              title: const Text('Credits'),
-              subtitle: const Text('Coming soon'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/credits');
               },
             ),
             ListTile(
@@ -217,7 +209,7 @@ class HomeScreen extends StatelessWidget {
                         Icons.shopping_cart,
                         Colors.purple,
                         () {
-                          // TODO: Navigate to Purchase screen
+                          Navigator.pushNamed(context, '/purchase');
                         },
                       ),
                     ],

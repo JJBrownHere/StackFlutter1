@@ -7,9 +7,9 @@ import 'screens/auth_callback_screen.dart';
 import 'screens/price_checks_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/account_screen.dart';
-import 'screens/credits_screen.dart';
 import 'screens/gatekeeper_screen.dart';
 import 'screens/inventory_summary_screen.dart';
+import 'screens/purchase_device_screen.dart';
 
 globalRefreshSession(BuildContext context) {
   // Helper to refresh the app after login/logout
@@ -92,8 +92,8 @@ class MyAppState extends State<MyApp> {
             '/price-checks': (context) => const PriceChecksScreen(),
             '/about': (context) => const AboutScreen(),
             '/account': (context) => const AccountScreen(),
-            '/credits': (context) => const CreditsScreen(),
             '/inventory-summary': (context) => const InventorySummaryScreen(),
+            '/purchase': (context) => const PurchaseDeviceScreen(),
           },
         );
       },
