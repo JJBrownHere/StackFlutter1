@@ -7,7 +7,7 @@ import '../widgets/device_details_form.dart';
 import '../widgets/seller_info_form.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
 import '../widgets/glass_container.dart';
-import '../widgets/glass_button.dart';
+import '../widgets/neo_container.dart';
 
 class PurchaseDeviceScreen extends StatefulWidget {
   const PurchaseDeviceScreen({super.key});
