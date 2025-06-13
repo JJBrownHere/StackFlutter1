@@ -2,15 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app_state.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/auth_callback_screen.dart';
-import 'screens/price_checks_screen.dart';
-import 'screens/about_screen.dart';
-import 'screens/account_screen.dart';
-import 'screens/gatekeeper_screen.dart';
-import 'screens/inventory_summary_screen.dart';
-import 'screens/purchase_device_screen.dart';
 
 globalRefreshSession(BuildContext context) {
   // Helper to refresh the app after login/logout
