@@ -252,23 +252,25 @@ class HomeScreen extends StatelessWidget {
                         'Web Analytics',
                         Icons.analytics,
                         Colors.teal,
-                        () async {
-                          final connected = await _isAnalyticsConnected();
-                          if (connected) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AnalyticsScreen(
-                                  analyticsService: AnalyticsService(
-                                    await SharedPreferences.getInstance(),
-                                    Supabase.instance.client,
+                        () {
+                          () async {
+                            final connected = await _isAnalyticsConnected();
+                            if (connected) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AnalyticsScreen(
+                                    analyticsService: AnalyticsService(
+                                      await SharedPreferences.getInstance(),
+                                      Supabase.instance.client,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          } else {
-                            Navigator.pushNamed(context, '/account');
-                          }
+                              );
+                            } else {
+                              Navigator.pushNamed(context, '/account');
+                            }
+                          }();
                         },
                       ),
                     ],

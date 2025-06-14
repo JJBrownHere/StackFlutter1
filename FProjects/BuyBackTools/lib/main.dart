@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => AccountScreen(analyticsService: analyticsService),
+        '/': (context) => const AccountScreen(),
         '/analytics': (context) => AnalyticsScreen(analyticsService: analyticsService),
       },
     );
