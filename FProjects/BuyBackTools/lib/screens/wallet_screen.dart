@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../services/wallet_service.dart';
 
+// Conditional import for web
+import 'dart:html' if (dart.library.html) 'dart:html' as html;
+
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
 
@@ -54,9 +57,9 @@ class _WalletScreenState extends State<WalletScreen> {
     if (amount == null || amount <= 0) return;
     
     final checkoutUrl = await _walletService.createCheckoutSession(amount);
-    if (checkoutUrl != null && mounted) {
+    if (checkoutUrl != null && mounted && kIsWeb) {
       // Open Stripe checkout in new window
-      window.open(checkoutUrl, 'stripe_checkout');
+      html.window.open(checkoutUrl, 'stripe_checkout');
     }
   }
 
