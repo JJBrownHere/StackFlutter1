@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
@@ -9,6 +10,7 @@ import 'screens/account_screen.dart';
 import 'screens/gatekeeper_screen.dart';
 import 'screens/inventory_summary_screen.dart';
 import 'screens/purchase_device_screen.dart';
+import 'screens/wallet_screen.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -78,6 +80,7 @@ class MyAppState extends State<MyApp> {
             '/account': (context) => const AccountScreen(),
             '/inventory-summary': (context) => const InventorySummaryScreen(),
             '/purchase': (context) => const PurchaseDeviceScreen(),
+            if (kIsWeb) '/wallet': (context) => const WalletScreen(),
           },
         );
       },
