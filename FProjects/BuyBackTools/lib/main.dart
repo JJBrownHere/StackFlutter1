@@ -24,7 +24,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final analyticsService = AnalyticsService(prefs, Supabase.instance.client);
   
-  runApp(MyApp(analyticsService: analyticsService));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
