@@ -298,6 +298,28 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  Future<void> _handleAnalyticsOAuth() async {
+    setState(() { _isLoading = true; });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final analyticsService = AnalyticsService(prefs, Supabase.instance.client);
+      await analyticsService.initiateOAuth();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error connecting to Google Analytics: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() { _isLoading = false; });
+      }
+    }
+  }
+
   Widget _buildSheetSection(String type, String label) {
     final sheet = _sheets.firstWhere(
       (s) => s['type'] == type,
@@ -458,8 +480,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     onPressed: (ga4Id == null || ga4Id.toString().isEmpty)
                         ? () async {
                             // Start OAuth
-                            final service = AnalyticsService(await SharedPreferences.getInstance(), Supabase.instance.client);
-                            await service.initiateOAuth();
+                            await _handleAnalyticsOAuth();
                           }
                         : null,
                     child: Text(

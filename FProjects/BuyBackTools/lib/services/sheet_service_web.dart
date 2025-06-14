@@ -12,6 +12,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class SheetService {
   static String? _apiKey;
   static String? _googleSheetsApiKey;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'profile',
+      'https://www.googleapis.com/auth/spreadsheets.readonly',
+      'https://www.googleapis.com/auth/drive.readonly',
+    ],
+  );
 
   static Future<void> loadApiKeys() async {
     final response = await html.HttpRequest.getString('api_key.json');
@@ -21,8 +29,24 @@ class SheetService {
   }
 
   Future<List<List<String>>> _fetchSheetRows(String spreadsheetId, String sheetName) async {
-    final session = Supabase.instance.client.auth.currentSession;
-    final accessToken = session?.providerToken;
+    String? accessToken;
+    try {
+      // Try to get token from Supabase session first
+      final session = Supabase.instance.client.auth.currentSession;
+      accessToken = session?.providerToken;
+      
+      // If no token in session, try Google Sign-In
+      if (accessToken == null) {
+        final googleUser = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+        if (googleUser != null) {
+          final auth = await googleUser.authentication;
+          accessToken = auth.accessToken;
+        }
+      }
+    } catch (e) {
+      // Handle OAuth errors silently, will fall back to API key
+    }
+
     String url = 'https://sheets.googleapis.com/v4/spreadsheets/$spreadsheetId/values/$sheetName';
     final headers = <String, String>{};
     if (accessToken != null) {
@@ -30,6 +54,7 @@ class SheetService {
     } else {
       url += '?key=${_googleSheetsApiKey!}';
     }
+    
     final response = await http.get(Uri.parse(url), headers: headers);
     dynamic data;
     try {
