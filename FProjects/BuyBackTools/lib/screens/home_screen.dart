@@ -9,6 +9,8 @@ import 'inventory_summary_screen.dart';
 import 'purchase_device_screen.dart';
 import '../widgets/glass_container.dart';
 import '../app_state.dart';
+import '../services/analytics_service.dart';
+import 'analytics_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,17 @@ class HomeScreen extends StatelessWidget {
     if (!await launchUrl(whatsappUrl)) {
       throw Exception('Could not launch WhatsApp');
     }
+  }
+
+  Future<bool> _isAnalyticsConnected() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return false;
+    final profile = await Supabase.instance.client
+        .from('profiles')
+        .select('ga4_id')
+        .eq('id', user.id)
+        .maybeSingle();
+    return profile != null && profile['ga4_id'] != null && profile['ga4_id'].toString().isNotEmpty;
   }
 
   @override
@@ -239,8 +252,23 @@ class HomeScreen extends StatelessWidget {
                         'Web Analytics',
                         Icons.analytics,
                         Colors.teal,
-                        () {
-                          Navigator.pushNamed(context, '/account');
+                        () async {
+                          final connected = await _isAnalyticsConnected();
+                          if (connected) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AnalyticsScreen(
+                                  analyticsService: AnalyticsService(
+                                    await SharedPreferences.getInstance(),
+                                    Supabase.instance.client,
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.pushNamed(context, '/account');
+                          }
                         },
                       ),
                     ],

@@ -49,7 +49,7 @@ dependencies:
   provider: ^6.1.2
 
   # Network
-  http: ^1.2.0
+  http: ^1.1.0
   path_provider: ^2.1.2
   path_provider_android: ^2.1.1
 
@@ -59,12 +59,15 @@ dependencies:
   # Additional dependencies
   image_picker: ^1.0.7
   permission_handler: ^11.3.0
-  url_launcher: ^6.2.5
+  url_launcher: ^6.2.2
 
   gsheets: ^0.5.0
   html: ^0.15.6
   csv: ^5.1.1
   encrypt: ^5.0.3
+  shared_preferences: ^2.2.2
+  fl_chart: ^0.65.0
+  webview_flutter: ^4.4.2
 
 dev_dependencies:
   flutter_test:

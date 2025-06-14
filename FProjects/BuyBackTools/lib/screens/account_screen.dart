@@ -8,6 +8,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/glass_container.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import '../screens/analytics_screen.dart';
+import '../services/analytics_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -27,6 +30,8 @@ class _AccountScreenState extends State<AccountScreen> {
   final _encryptionKey = encrypt.Key.fromUtf8('my32lengthsupersecretnooneknows1');
   final _iv = encrypt.IV.fromLength(16);
   late final encrypt.Encrypter _encrypter;
+  String? _pendingAccessToken;
+  List<Map<String, dynamic>> _pendingProperties = [];
 
   @override
   void initState() {
@@ -241,6 +246,58 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _handleOAuthCallback(String accessToken) async {
+    // Fetch properties and show selection dialog
+    final service = AnalyticsService(await SharedPreferences.getInstance(), Supabase.instance.client);
+    final properties = await service.fetchGA4Properties(accessToken);
+    setState(() {
+      _pendingAccessToken = accessToken;
+      _pendingProperties = properties;
+    });
+    if (properties.isNotEmpty) {
+      _showPropertySelectionDialog(properties, accessToken);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No GA4 properties found in your account.')),
+      );
+    }
+  }
+
+  void _showPropertySelectionDialog(List<Map<String, dynamic>> properties, String accessToken) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Google Analytics Property'),
+          content: SizedBox(
+            width: 400,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: properties.length,
+              itemBuilder: (context, index) {
+                final prop = properties[index];
+                return ListTile(
+                  title: Text(prop['displayName'] ?? prop['name']),
+                  subtitle: Text(prop['name']),
+                  onTap: () async {
+                    final service = AnalyticsService(await SharedPreferences.getInstance(), Supabase.instance.client);
+                    await service.saveSelectedProperty(accessToken, prop['name']);
+                    Navigator.of(context).pop();
+                    await _loadProfileAndSheets();
+                    setState(() {
+                      _pendingAccessToken = null;
+                      _pendingProperties = [];
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSheetSection(String type, String label) {
     final sheet = _sheets.firstWhere(
       (s) => s['type'] == type,
@@ -354,6 +411,101 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  Widget _buildGoogleAnalyticsSection() {
+    final ga4Id = _profile?['ga4_id'];
+    final gaOauthConnected = _profile?['ga_oauth_connected'] == true;
+    final needsProperty = gaOauthConnected && (ga4Id == null || ga4Id.toString().isEmpty);
+    return GlassContainer(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Google Analytics',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (ga4Id != null && ga4Id.toString().isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Connected',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Connect your Google Analytics account to view detailed analytics data.',
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: (ga4Id == null || ga4Id.toString().isEmpty)
+                        ? () async {
+                            // Start OAuth
+                            final service = AnalyticsService(await SharedPreferences.getInstance(), Supabase.instance.client);
+                            await service.initiateOAuth();
+                          }
+                        : null,
+                    child: Text(
+                      (ga4Id == null || ga4Id.toString().isEmpty)
+                          ? 'Connect Google Analytics'
+                          : 'Connected',
+                    ),
+                  ),
+                ),
+                if (ga4Id != null && ga4Id.toString().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AnalyticsScreen(
+                              analyticsService: AnalyticsService(
+                                SharedPreferences.getInstance() as SharedPreferences,
+                                Supabase.instance.client,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.analytics),
+                      label: const Text('View Analytics'),
+                    ),
+                  ),
+              ],
+            ),
+            if (needsProperty && _pendingProperties.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Please select a property to complete connection.',
+                  style: TextStyle(color: Colors.orange[800]),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
@@ -422,77 +574,7 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Google Analytics section
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                'Google Analytics',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            GlassContainer(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if ((_profile?['ga4_id'] ?? '').toString().isNotEmpty || (_profile?['ga_oauth_connected'] ?? false) == true) ...[
-                      Row(
-                        children: const [
-                          Icon(Icons.verified, color: Colors.green),
-                          SizedBox(width: 8),
-                          Text('Google Analytics Connected ✅', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ] else ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              enabled: !(_profile?['ga4_id'] ?? '').toString().isNotEmpty,
-                              controller: TextEditingController(),
-                              decoration: const InputDecoration(
-                                labelText: 'Enter GA4 Measurement ID',
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: (_profile?['ga4_id'] ?? '').toString().isNotEmpty ? null : () async {
-                              // Save GA4 ID logic
-                              final user = Supabase.instance.client.auth.currentUser;
-                              final ga4Id = '';
-                              // TODO: Get value from TextField
-                              if (user != null && ga4Id.isNotEmpty) {
-                                await Supabase.instance.client.from('profiles').update({'ga4_id': ga4Id}).eq('id', user.id);
-                                await _loadProfileAndSheets();
-                              }
-                            },
-                            child: const Text('Save'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: (_profile?['ga_oauth_connected'] ?? false) == true ? null : () async {
-                          // Placeholder for Google OAuth connect
-                          final user = Supabase.instance.client.auth.currentUser;
-                          if (user != null) {
-                            await Supabase.instance.client.from('profiles').update({'ga_oauth_connected': true}).eq('id', user.id);
-                            await _loadProfileAndSheets();
-                          }
-                        },
-                        child: const Text('Connect Your Google Analytics Account'),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+            _buildGoogleAnalyticsSection(),
             const SizedBox(height: 16),
             // IMEI Integration section
             Padding(

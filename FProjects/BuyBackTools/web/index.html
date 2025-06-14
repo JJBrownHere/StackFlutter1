@@ -35,7 +35,7 @@
 
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
+    const serviceWorkerVersion = null;
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
@@ -55,6 +55,23 @@
         }
       });
     });
+  </script>
+  <script>
+    // Handle OAuth callback
+    if (window.location.hash) {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const expiresIn = params.get('expires_in');
+      
+      if (accessToken) {
+        // Send the token to Flutter
+        window.flutter_inappwebview.callHandler('onOAuthCallback', {
+          accessToken: accessToken,
+          expiresIn: expiresIn
+        });
+      }
+    }
   </script>
 </body>
 </html>

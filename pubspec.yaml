@@ -28,10 +28,10 @@ dependencies:
   provider: ^6.1.5
 
   # Network
-  http: ^1.4.0
+  http: ^1.1.0
   path_provider: ^2.1.5
   path_provider_android: ^2.2.17
-  url_launcher: ^6.2.5
+  url_launcher: ^6.2.2
 
   # Deep Link
   app_links: 3.5.1
@@ -40,6 +40,11 @@ dependencies:
   camera: ^0.10.5+9
   permission_handler: ^11.3.0
   image_picker: ^1.0.7
+
+  # Google Analytics
+  shared_preferences: ^2.2.2
+  fl_chart: ^0.65.0
+  webview_flutter: ^4.4.2
 
 dev_dependencies:
   flutter_test:
