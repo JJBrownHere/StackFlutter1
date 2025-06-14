@@ -1,21 +1,13 @@
-export 'analytics_service_stub.dart'
-  if (dart.library.html) 'analytics_service_web.dart'
-  if (dart.library.io) 'analytics_service_mobile.dart';
-
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// Only import dart:html for web
-// Only import flutter_web_auth for mobile
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 
 class AnalyticsService {
   static const String _clientId = '670058417215-npdc8in6n4kalmkj073sqrj1aaf8g4h8.apps.googleusercontent.com';
   static const String _redirectUri = 'https://itscrazyamazing.com/oauth2callback';
   static const String _scope = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/analytics.edit https://www.googleapis.com/auth/analytics.manage.users.readonly https://www.googleapis.com/auth/analytics.manage.users';
-  static const String _tokenEndpoint = 'https://oauth2.googleapis.com/token';
 
   final SharedPreferences _prefs;
   final SupabaseClient _supabase;
@@ -38,28 +30,18 @@ class AnalyticsService {
       'include_granted_scopes': 'true',
       'prompt': 'consent',
     });
-    if (kIsWeb) {
-      // Only import dart:html here
-      // ignore: avoid_web_libraries_in_flutter
-      import 'dart:html' as html;
-      html.window.location.href = authUrl.toString();
-    } else {
-      final result = await FlutterWebAuth.authenticate(
-        url: authUrl.toString(),
-        callbackUrlScheme: 'https',
-      );
-      // Parse the access token from the result URL
-      final uri = Uri.parse(result);
-      final accessToken = uri.queryParameters['access_token'];
-      if (accessToken != null) {
-        // Handle callback as on web
-        // You may want to call a callback or update state here
-      }
+    final result = await FlutterWebAuth.authenticate(
+      url: authUrl.toString(),
+      callbackUrlScheme: 'https',
+    );
+    final uri = Uri.parse(result);
+    final accessToken = uri.queryParameters['access_token'];
+    if (accessToken != null) {
+      // You may want to call a callback or update state here
     }
   }
 
   Future<List<Map<String, dynamic>>> fetchGA4Properties(String accessToken) async {
-    // Get accounts first
     final accountsResp = await http.get(
       Uri.parse('https://analyticsadmin.googleapis.com/v2/accounts'),
       headers: {'Authorization': 'Bearer $accessToken'},
@@ -67,8 +49,7 @@ class AnalyticsService {
     if (accountsResp.statusCode != 200) throw Exception('Failed to fetch accounts');
     final accounts = jsonDecode(accountsResp.body)['accounts'] as List?;
     if (accounts == null || accounts.isEmpty) return [];
-    final accountId = accounts[0]['name']; // e.g. 'accounts/123456789'
-    // Get properties for the first account
+    final accountId = accounts[0]['name'];
     final propsResp = await http.get(
       Uri.parse('https://analyticsadmin.googleapis.com/v2/$accountId/properties'),
       headers: {'Authorization': 'Bearer $accessToken'},
