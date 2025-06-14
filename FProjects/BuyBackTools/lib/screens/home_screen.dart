@@ -11,6 +11,7 @@ import '../widgets/glass_container.dart';
 import '../app_state.dart';
 import '../services/analytics_service.dart';
 import 'analytics_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -253,6 +254,13 @@ class HomeScreen extends StatelessWidget {
                         Icons.analytics,
                         Colors.teal,
                         () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const Center(child: CircularProgressIndicator()),
+                          );
+                          final prefs = await SharedPreferences.getInstance();
+                          Navigator.of(context).pop(); // Remove loading
                           final connected = await _isAnalyticsConnected();
                           if (connected) {
                             Navigator.push(
@@ -260,7 +268,7 @@ class HomeScreen extends StatelessWidget {
                               MaterialPageRoute(
                                 builder: (context) => AnalyticsScreen(
                                   analyticsService: AnalyticsService(
-                                    SharedPreferences.getInstance() as SharedPreferences,
+                                    prefs,
                                     Supabase.instance.client,
                                   ),
                                 ),
