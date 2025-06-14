@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'price_checks_screen.dart';
 import 'imei_checks_screen.dart';
@@ -83,6 +84,15 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/account');
               },
             ),
+            if (kIsWeb)
+              ListTile(
+                leading: const Icon(Icons.account_balance_wallet),
+                title: const Text('Wallet'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/wallet');
+                },
+              ),
             SwitchListTile(
               title: const Text('Dark Mode'),
               subtitle: const Text('Toggle dark theme'),
@@ -251,6 +261,8 @@ class HomeScreen extends StatelessWidget {
     Color color,
     VoidCallback onTap,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF2D3436);
     return GlassContainer(
       borderRadius: 16,
       child: InkWell(
@@ -269,10 +281,10 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D3436),
+                  color: textColor,
                 ),
                 textAlign: TextAlign.center,
               ),
