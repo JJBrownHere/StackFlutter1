@@ -74,6 +74,7 @@ class MyAppState extends State<MyApp> {
           initialRoute: '/',
           routes: {
             '/': (context) => authenticated ? const GatekeeperScreen() : const LoginScreen(),
+            '/login': (context) => const LoginScreen(),
             '/auth-callback': (context) => const AuthCallbackScreen(),
             '/price-checks': (context) => const PriceChecksScreen(),
             '/about': (context) => const AboutScreen(),

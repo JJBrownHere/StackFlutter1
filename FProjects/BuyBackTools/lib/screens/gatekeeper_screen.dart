@@ -22,8 +22,8 @@ class _GatekeeperScreenState extends State<GatekeeperScreen> {
   Future<void> _checkProfile() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      // Not logged in, go to home (or login)
-      Navigator.of(context).pushReplacementNamed('/');
+      // Not logged in, go to login
+      Navigator.of(context).pushReplacementNamed('/login');
       return;
     }
     final profile = await Supabase.instance.client
