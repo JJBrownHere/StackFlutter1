@@ -234,6 +234,15 @@ class HomeScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      _buildDashboardCard(
+                        context,
+                        'Web Analytics',
+                        Icons.analytics,
+                        Colors.teal,
+                        () {
+                          Navigator.pushNamed(context, '/account');
+                        },
+                      ),
                     ],
                   );
                 },
