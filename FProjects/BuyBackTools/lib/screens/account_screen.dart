@@ -427,55 +427,82 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_profile != null && (_profile!['SickwAPI'] ?? '').toString().isNotEmpty)
+                    if (_profile != null && (_profile!['SickwAPI'] ?? '').toString().isNotEmpty) ...[
                       Row(
                         children: const [
                           Icon(Icons.verified, color: Colors.green),
                           SizedBox(width: 8),
                           Text('SickW API Key Connected ✅', style: TextStyle(fontWeight: FontWeight.bold)),
                         ],
-                      )
-                    else ...[
-                      TextField(
-                        controller: _sickwApiController,
-                        decoration: const InputDecoration(
-                          labelText: 'Enter SickW API Key',
-                          border: OutlineInputBorder(),
-                        ),
                       ),
                       const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _savingSickwApi ? null : _saveSickwApiKey,
-                          child: _savingSickwApi
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Text('Save'),
-                        ),
+                      Builder(
+                        builder: (context) {
+                          return GestureDetector(
+                            onTap: () async {
+                              const url = 'https://SickW.com';
+                              if (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
+                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              } else {
+                                await launchUrl(Uri.parse(url), webOnlyWindowName: '_blank');
+                              }
+                            },
+                            child: const Text(
+                              'Manage your SickW Account',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                    Builder(
-                      builder: (context) {
-                        return GestureDetector(
-                          onTap: () async {
-                            const url = 'https://SickW.com';
-                            if (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
-                              await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                            } else {
-                              await launchUrl(Uri.parse(url), webOnlyWindowName: '_blank');
-                            }
-                          },
-                          child: const Text(
-                            'Get your SickW API Key Here',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
+                    ] else ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _sickwApiController,
+                              decoration: const InputDecoration(
+                                labelText: 'Enter SickW API Key',
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: _savingSickwApi ? null : _saveSickwApiKey,
+                            child: _savingSickwApi
+                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Text('Save'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Builder(
+                        builder: (context) {
+                          return GestureDetector(
+                            onTap: () async {
+                              const url = 'https://SickW.com';
+                              if (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
+                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              } else {
+                                await launchUrl(Uri.parse(url), webOnlyWindowName: '_blank');
+                              }
+                            },
+                            child: const Text(
+                              'Get your SickW API Key Here',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
