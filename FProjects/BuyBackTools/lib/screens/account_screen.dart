@@ -7,6 +7,7 @@ import '../services/inventory_sheet_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/glass_container.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -21,10 +22,16 @@ class _AccountScreenState extends State<AccountScreen> {
   List<Map<String, dynamic>> _sheets = [];
   final _inventorySheetService = InventorySheetService();
   TextEditingController _sheetUrlController = TextEditingController();
+  TextEditingController _sickwApiController = TextEditingController();
+  bool _savingSickwApi = false;
+  final _encryptionKey = encrypt.Key.fromUtf8('my32lengthsupersecretnooneknows1');
+  final _iv = encrypt.IV.fromLength(16);
+  late final encrypt.Encrypter _encrypter;
 
   @override
   void initState() {
     super.initState();
+    _encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
     _loadProfileAndSheets();
   }
 
@@ -45,10 +52,23 @@ class _AccountScreenState extends State<AccountScreen> {
         _profile = profile;
         _sheets = List<Map<String, dynamic>>.from(sheets);
         _isLoading = false;
+        _sickwApiController.text = '';
       });
     } else {
       setState(() { _isLoading = false; });
     }
+  }
+
+  Future<void> _saveSickwApiKey() async {
+    setState(() { _savingSickwApi = true; });
+    final user = Supabase.instance.client.auth.currentUser;
+    final key = _sickwApiController.text.trim();
+    if (user != null && key.isNotEmpty) {
+      final encrypted = _encrypter.encrypt(key, iv: _iv).base64;
+      await Supabase.instance.client.from('profiles').update({'SickwAPI': encrypted}).eq('id', user.id);
+      await _loadProfileAndSheets();
+    }
+    setState(() { _savingSickwApi = false; });
   }
 
   Future<void> _createInventorySheet() async {
@@ -407,13 +427,33 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Enter SickW API Key',
-                        border: OutlineInputBorder(),
+                    if (_profile != null && (_profile!['SickwAPI'] ?? '').toString().isNotEmpty)
+                      Row(
+                        children: const [
+                          Icon(Icons.verified, color: Colors.green),
+                          SizedBox(width: 8),
+                          Text('SickW API Key Connected ✅', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ],
+                      )
+                    else ...[
+                      TextField(
+                        controller: _sickwApiController,
+                        decoration: const InputDecoration(
+                          labelText: 'Enter SickW API Key',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _savingSickwApi ? null : _saveSickwApiKey,
+                          child: _savingSickwApi
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Text('Save'),
+                        ),
+                      ),
+                    ],
                     Builder(
                       builder: (context) {
                         return GestureDetector(

@@ -64,6 +64,7 @@ dependencies:
   gsheets: ^0.5.0
   html: ^0.15.6
   csv: ^5.1.1
+  encrypt: ^5.0.3
 
 dev_dependencies:
   flutter_test:
