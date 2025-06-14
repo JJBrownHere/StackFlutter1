@@ -83,6 +83,20 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/account');
               },
             ),
+            SwitchListTile(
+              title: const Text('Dark Mode'),
+              subtitle: const Text('Toggle dark theme'),
+              value: Theme.of(context).brightness == Brightness.dark,
+              onChanged: (isDark) {
+                final appState = context.findAncestorStateOfType<MyAppState>();
+                appState?.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
+              },
+              secondary: Icon(
+                Theme.of(context).brightness == Brightness.dark
+                    ? Icons.dark_mode
+                    : Icons.light_mode,
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.support_agent),
               title: const Text('Support'),
@@ -115,19 +129,6 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 );
-              },
-            ),
-            SwitchListTile(
-              title: const Text('Dark Mode'),
-              secondary: Icon(
-                Theme.of(context).brightness == Brightness.dark
-                    ? Icons.dark_mode
-                    : Icons.light_mode,
-              ),
-              value: Theme.of(context).brightness == Brightness.dark,
-              onChanged: (isDark) {
-                final appState = context.findAncestorStateOfType<MyAppState>();
-                appState?.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
               },
             ),
             const Divider(),
