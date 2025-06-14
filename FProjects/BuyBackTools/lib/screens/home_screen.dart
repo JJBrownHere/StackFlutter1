@@ -84,15 +84,6 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pushNamed(context, '/account');
               },
             ),
-            if (kIsWeb)
-              ListTile(
-                leading: const Icon(Icons.account_balance_wallet),
-                title: const Text('Wallet'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/wallet');
-                },
-              ),
             SwitchListTile(
               title: const Text('Dark Mode'),
               subtitle: const Text('Toggle dark theme'),
