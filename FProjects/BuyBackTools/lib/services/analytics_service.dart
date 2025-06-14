@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+// Only import dart:html for web
+// Only import flutter_web_auth for mobile
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 
 class AnalyticsService {
   static const String _clientId = '670058417215-npdc8in6n4kalmkj073sqrj1aaf8g4h8.apps.googleusercontent.com';
@@ -34,7 +34,24 @@ class AnalyticsService {
       'include_granted_scopes': 'true',
       'prompt': 'consent',
     });
-    html.window.location.href = authUrl.toString();
+    if (kIsWeb) {
+      // Only import dart:html here
+      // ignore: avoid_web_libraries_in_flutter
+      import 'dart:html' as html;
+      html.window.location.href = authUrl.toString();
+    } else {
+      final result = await FlutterWebAuth.authenticate(
+        url: authUrl.toString(),
+        callbackUrlScheme: 'https',
+      );
+      // Parse the access token from the result URL
+      final uri = Uri.parse(result);
+      final accessToken = uri.queryParameters['access_token'];
+      if (accessToken != null) {
+        // Handle callback as on web
+        // You may want to call a callback or update state here
+      }
+    }
   }
 
   Future<List<Map<String, dynamic>>> fetchGA4Properties(String accessToken) async {

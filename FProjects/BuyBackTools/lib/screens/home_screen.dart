@@ -260,7 +260,7 @@ class HomeScreen extends StatelessWidget {
                               MaterialPageRoute(
                                 builder: (context) => AnalyticsScreen(
                                   analyticsService: AnalyticsService(
-                                    await SharedPreferences.getInstance(),
+                                    SharedPreferences.getInstance() as SharedPreferences,
                                     Supabase.instance.client,
                                   ),
                                 ),
