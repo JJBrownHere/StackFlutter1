@@ -31,9 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       }).eq('id', user.id);
     }
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      Navigator.of(context).pushReplacementNamed('/home');
     }
   }
 

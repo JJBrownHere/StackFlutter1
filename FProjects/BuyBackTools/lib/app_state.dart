@@ -10,6 +10,7 @@ import 'screens/account_screen.dart';
 import 'screens/gatekeeper_screen.dart';
 import 'screens/inventory_summary_screen.dart';
 import 'screens/purchase_device_screen.dart';
+import 'screens/onboarding_screen.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -79,6 +80,8 @@ class MyAppState extends State<MyApp> {
             '/account': (context) => const AccountScreen(),
             '/inventory-summary': (context) => const InventorySummaryScreen(),
             '/purchase': (context) => const PurchaseDeviceScreen(),
+            '/home': (context) => const HomeScreen(),
+            '/onboarding': (context) => const OnboardingScreen(),
           },
         );
       },

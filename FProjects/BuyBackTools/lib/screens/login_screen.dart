@@ -110,9 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          Navigator.of(context).pushReplacementNamed('/');
         }
       }
     } catch (error, stack) {
@@ -161,9 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
           idToken: credential.identityToken!,
         );
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          Navigator.of(context).pushReplacementNamed('/');
         }
       }
     } catch (e) {
@@ -187,9 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleDevBypass() async {
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      Navigator.of(context).pushReplacementNamed('/');
     }
   }
 
