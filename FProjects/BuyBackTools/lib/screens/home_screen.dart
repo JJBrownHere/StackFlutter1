@@ -180,7 +180,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       _buildDashboardCard(
                         context,
-                        'IMEI Checks',
+                        'IMEI STACKS',
                         Icons.phone_android,
                         Colors.blue,
                         () {
@@ -208,7 +208,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _buildDashboardCard(
                         context,
-                        'Inventory',
+                        'Inventory STACKS',
                         Icons.inventory,
                         Colors.orange,
                         () {
@@ -222,7 +222,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _buildDashboardCard(
                         context,
-                        'Purchase',
+                        'Buy A Device 💵',
                         Icons.shopping_cart,
                         Colors.purple,
                         () {
