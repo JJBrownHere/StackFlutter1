@@ -34,8 +34,9 @@ class AnalyticsService {
   }
 
   Future<List<Map<String, dynamic>>> fetchGA4Properties(String accessToken) async {
+    // Use backend proxy to avoid CORS
     final accountsResp = await http.get(
-      Uri.parse('https://analyticsadmin.googleapis.com/v2/accounts'),
+      Uri.parse('/api/ga-proxy/accounts'),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
     if (accountsResp.statusCode != 200) throw Exception('Failed to fetch accounts');
@@ -43,7 +44,7 @@ class AnalyticsService {
     if (accounts == null || accounts.isEmpty) return [];
     final accountId = accounts[0]['name'];
     final propsResp = await http.get(
-      Uri.parse('https://analyticsadmin.googleapis.com/v2/$accountId/properties'),
+      Uri.parse('/api/ga-proxy/properties?accountId=$accountId'),
       headers: {'Authorization': 'Bearer $accessToken'},
     );
     if (propsResp.statusCode != 200) throw Exception('Failed to fetch properties');

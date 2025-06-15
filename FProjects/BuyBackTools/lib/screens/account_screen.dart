@@ -323,6 +323,16 @@ class _AccountScreenState extends State<AccountScreen> {
                       _pendingAccessToken = null;
                       _pendingProperties = [];
                     });
+                    // Navigate to Analytics screen
+                    if (mounted) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => AnalyticsScreen(
+                            analyticsService: service,
+                          ),
+                        ),
+                      );
+                    }
                   },
                 );
               },

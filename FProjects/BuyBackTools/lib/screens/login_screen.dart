@@ -47,11 +47,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (kIsWeb) {
-        await Supabase.instance.client.auth.signInWithOAuth(
-          OAuthProvider.google,
+        // Use window.location.href for OAuth to avoid new tab
+        final url = Supabase.instance.client.auth.getOAuthSignInUrl(
+          provider: OAuthProvider.google,
           redirectTo: 'https://itscrazyamazing.com/auth-callback',
           scopes: 'email profile',
         );
+        // ignore: undefined_prefixed_name
+        // @dart=2.12
+        // ignore: avoid_web_libraries_in_flutter
+        import 'dart:html' as html;
+        html.window.location.href = url;
         setState(() {
           _isLoading = false;
         });

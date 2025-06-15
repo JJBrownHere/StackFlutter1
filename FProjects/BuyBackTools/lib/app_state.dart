@@ -72,7 +72,7 @@ class MyAppState extends State<MyApp> {
           ),
           themeMode: _themeMode,
           routes: {
-            '/': (context) => authenticated ? const GatekeeperScreen() : const LoginScreen(),
+            '/': (context) => authenticated ? const HomeScreen() : const LoginScreen(),
             '/login': (context) => const LoginScreen(),
             '/auth-callback': (context) => const AuthCallbackScreen(),
             '/price-checks': (context) => const PriceChecksScreen(),
