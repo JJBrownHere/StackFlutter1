@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:html' if (dart.library.html) 'dart:html';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth_callback_screen.dart';
