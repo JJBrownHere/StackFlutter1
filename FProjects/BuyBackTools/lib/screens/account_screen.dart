@@ -39,9 +39,11 @@ class _AccountScreenState extends State<AccountScreen> {
     _encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
     _loadProfileAndSheets();
     // --- OAuth callback handling for web ---
+    print('[DEBUG] AccountScreen initState: URL fragment = ' + Uri.base.fragment);
     if (Uri.base.fragment.contains('access_token')) {
       final params = Uri.splitQueryString(Uri.base.fragment.replaceFirst('?', ''));
       final accessToken = params['access_token'];
+      print('[DEBUG] Found access_token in fragment: ' + (accessToken ?? 'null'));
       if (accessToken != null && accessToken.isNotEmpty) {
         _handleAnalyticsOAuthCallback(accessToken);
       }
@@ -255,15 +257,19 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _handleAnalyticsOAuthCallback(String accessToken) async {
+    print('[DEBUG] Entered _handleAnalyticsOAuthCallback with token: $accessToken');
     final service = AnalyticsService(await SharedPreferences.getInstance(), Supabase.instance.client);
     final properties = await service.fetchGA4Properties(accessToken);
+    print('[DEBUG] Properties fetched: ' + properties.length.toString());
     setState(() {
       _pendingAccessToken = accessToken;
       _pendingProperties = properties;
     });
     if (properties.isNotEmpty) {
+      print('[DEBUG] Showing property selection dialog');
       _showPropertySelectionDialog(properties, accessToken);
     } else {
+      print('[DEBUG] No properties found');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No GA4 properties found in your account.')),
       );
