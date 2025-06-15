@@ -71,7 +71,6 @@ class MyAppState extends State<MyApp> {
             scaffoldBackgroundColor: const Color(0xFF181A1B),
           ),
           themeMode: _themeMode,
-          initialRoute: '/',
           routes: {
             '/': (context) => authenticated ? const GatekeeperScreen() : const LoginScreen(),
             '/login': (context) => const LoginScreen(),
