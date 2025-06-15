@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   // Use the Web Client ID for serverClientId on Android only
   final _googleSignIn = GoogleSignIn(
-    serverClientId: Platform.isAndroid
+    serverClientId: (!kIsWeb && Platform.isAndroid)
       ? '670058417215-1sih5511cflim0ks2nkqdhpevv9teg3h.apps.googleusercontent.com'
       : null,
   );
@@ -147,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
           OAuthProvider.apple,
           redirectTo: 'https://itscrazyamazing.com/auth-callback',
         );
-      } else if (Platform.isIOS) {
+      } else if (!kIsWeb && Platform.isIOS) {
         final credential = await SignInWithApple.getAppleIDCredential(
           scopes: [
             AppleIDAuthorizationScopes.email,
@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Builder(
                     builder: (context) {
-                      if (kIsWeb || Platform.isIOS) {
+                      if (kIsWeb || (!kIsWeb && Platform.isIOS)) {
                         return SignInWithAppleButton(
                           onPressed: _handleAppleSignIn,
                           style: SignInWithAppleButtonStyle.black,
