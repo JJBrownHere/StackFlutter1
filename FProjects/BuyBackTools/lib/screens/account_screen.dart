@@ -50,6 +50,21 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // --- OAuth callback handling for web (repeat in case of hot reload or navigation) ---
+    print('[DEBUG] AccountScreen didChangeDependencies: URL fragment = ' + Uri.base.fragment);
+    if (Uri.base.fragment.contains('access_token')) {
+      final params = Uri.splitQueryString(Uri.base.fragment.replaceFirst('?', ''));
+      final accessToken = params['access_token'];
+      print('[DEBUG] (didChangeDependencies) Found access_token in fragment: ' + (accessToken ?? 'null'));
+      if (accessToken != null && accessToken.isNotEmpty) {
+        _handleAnalyticsOAuthCallback(accessToken);
+      }
+    }
+  }
+
   Future<void> _loadProfileAndSheets() async {
     setState(() { _isLoading = true; });
     final user = Supabase.instance.client.auth.currentUser;
