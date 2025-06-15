@@ -11,7 +11,7 @@
         var accessToken = params.get('access_token');
         if (accessToken) {
           // Redirect to /account with the token as a query parameter
-          window.location.href = '/account?access_token=' + encodeURIComponent(accessToken);
+          window.location.href = '/?access_token=' + encodeURIComponent(accessToken);
         } else {
           document.body.innerText = 'No access token found.';
         }

@@ -28,6 +28,22 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     refreshSession();
+    // Check for access_token in query parameters
+    if (kIsWeb) {
+      final accessToken = Uri.base.queryParameters['access_token'];
+      if (accessToken != null && accessToken.isNotEmpty) {
+        // Clear the query parameters to prevent re-triggering
+        final uri = Uri(
+          path: '/',
+          queryParameters: {},
+        );
+        window.history.pushState({}, '', uri.toString());
+        // Navigate to account screen
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pushReplacementNamed('/account');
+        });
+      }
+    }
   }
 
   void refreshSession() {
