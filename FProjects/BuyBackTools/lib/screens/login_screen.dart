@@ -48,17 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (kIsWeb) {
-        // Use window.location.href for OAuth to avoid new tab
-        final url = Supabase.instance.client.auth.getOAuthSignInUrl(
-          provider: OAuthProvider.google,
+        await Supabase.instance.client.auth.signInWithOAuth(
+          OAuthProvider.google,
           redirectTo: 'https://itscrazyamazing.com/auth-callback',
           scopes: 'email profile',
         );
-        html.window.location.href = url;
-        setState(() {
-          _isLoading = false;
-        });
-        return;
       } else {
         print('DEBUG: Starting native Google sign-in');
         final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
