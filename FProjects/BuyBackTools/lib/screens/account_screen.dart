@@ -38,6 +38,14 @@ class _AccountScreenState extends State<AccountScreen> {
     super.initState();
     _encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
     _loadProfileAndSheets();
+    // --- OAuth callback handling for web ---
+    if (Uri.base.fragment.contains('access_token')) {
+      final params = Uri.splitQueryString(Uri.base.fragment.replaceFirst('?', ''));
+      final accessToken = params['access_token'];
+      if (accessToken != null && accessToken.isNotEmpty) {
+        _handleAnalyticsOAuthCallback(accessToken);
+      }
+    }
   }
 
   Future<void> _loadProfileAndSheets() async {
@@ -246,8 +254,7 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Future<void> _handleOAuthCallback(String accessToken) async {
-    // Fetch properties and show selection dialog
+  Future<void> _handleAnalyticsOAuthCallback(String accessToken) async {
     final service = AnalyticsService(await SharedPreferences.getInstance(), Supabase.instance.client);
     final properties = await service.fetchGA4Properties(accessToken);
     setState(() {
