@@ -22,8 +22,10 @@ class _GatekeeperScreenState extends State<GatekeeperScreen> {
   Future<void> _checkProfile() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      // Not logged in, go to login
-      Navigator.of(context).pushReplacementNamed('/login');
+      // Not logged in, go to home (or login)
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
       return;
     }
     final profile = await Supabase.instance.client
@@ -32,9 +34,13 @@ class _GatekeeperScreenState extends State<GatekeeperScreen> {
         .eq('id', user.id)
         .maybeSingle();
     if (profile == null || (profile['business_name'] == null || profile['business_name'].toString().isEmpty)) {
-      Navigator.of(context).pushReplacementNamed('/onboarding');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      );
     } else {
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     }
   }
 
