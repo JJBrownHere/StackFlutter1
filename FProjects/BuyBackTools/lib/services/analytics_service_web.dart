@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AnalyticsService {
   static const String _clientId = '670058417215-npdc8in6n4kalmkj073sqrj1aaf8g4h8.apps.googleusercontent.com';
-  static const String _redirectUri = 'https://itscrazyamazing.com/account';
+  static const String _redirectUri = 'https://itscrazyamazing.com/oauth2callback.html';
   static const String _scope = 'https://www.googleapis.com/auth/analytics.readonly';
 
   final SharedPreferences _prefs;

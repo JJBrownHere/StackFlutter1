@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>OAuth2 Callback</title>
+  <script>
+    // On load, extract the access token from the URL fragment and redirect to /account
+    window.onload = function() {
+      if (window.location.hash) {
+        var params = new URLSearchParams(window.location.hash.substring(1));
+        var accessToken = params.get('access_token');
+        if (accessToken) {
+          // Redirect to /account with the token as a query parameter
+          window.location.href = '/account?access_token=' + encodeURIComponent(accessToken);
+        } else {
+          document.body.innerText = 'No access token found.';
+        }
+      } else {
+        document.body.innerText = 'No OAuth data found.';
+      }
+    };
+  </script>
+</head>
+<body>
+  Redirecting...
+</body>
+</html> 

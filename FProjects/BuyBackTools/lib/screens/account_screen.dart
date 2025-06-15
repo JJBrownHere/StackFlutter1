@@ -55,6 +55,13 @@ class _AccountScreenState extends State<AccountScreen> {
     super.didChangeDependencies();
     // --- OAuth callback handling for web (repeat in case of hot reload or navigation) ---
     print('[DEBUG] AccountScreen didChangeDependencies: URL fragment = ' + Uri.base.fragment);
+    // Check for access_token in query params (from oauth2callback.html)
+    final accessTokenFromQuery = Uri.base.queryParameters['access_token'];
+    if (accessTokenFromQuery != null && accessTokenFromQuery.isNotEmpty) {
+      print('[DEBUG] (didChangeDependencies) Found access_token in query: ' + accessTokenFromQuery);
+      _handleAnalyticsOAuthCallback(accessTokenFromQuery);
+      return;
+    }
     if (Uri.base.fragment.contains('access_token')) {
       final params = Uri.splitQueryString(Uri.base.fragment.replaceFirst('?', ''));
       final accessToken = params['access_token'];
