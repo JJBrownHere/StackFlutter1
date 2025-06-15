@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import '../helpers/session_helper.dart';
 import '../helpers/keyboard_dismiss_wrapper.dart';
 import 'dart:convert';
+import 'dart:html' as html;
 // Conditional import for mobile deep link handling
 import 'login_links_mobile.dart'
   if (dart.library.html) 'login_links_stub.dart';
@@ -53,10 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
           redirectTo: 'https://itscrazyamazing.com/auth-callback',
           scopes: 'email profile',
         );
-        // ignore: undefined_prefixed_name
-        // @dart=2.12
-        // ignore: avoid_web_libraries_in_flutter
-        import 'dart:html' as html;
         html.window.location.href = url;
         setState(() {
           _isLoading = false;
