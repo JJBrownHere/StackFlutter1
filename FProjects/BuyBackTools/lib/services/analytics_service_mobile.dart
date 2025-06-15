@@ -7,7 +7,7 @@ import 'package:flutter_web_auth/flutter_web_auth.dart';
 class AnalyticsService {
   static const String _clientId = '670058417215-npdc8in6n4kalmkj073sqrj1aaf8g4h8.apps.googleusercontent.com';
   static const String _redirectUri = 'https://itscrazyamazing.com/oauth2callback';
-  static const String _scope = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/analytics.edit https://www.googleapis.com/auth/analytics.manage.users.readonly https://www.googleapis.com/auth/analytics.manage.users';
+  static const String _scope = 'https://www.googleapis.com/auth/analytics.readonly';
 
   final SharedPreferences _prefs;
   final SupabaseClient _supabase;
